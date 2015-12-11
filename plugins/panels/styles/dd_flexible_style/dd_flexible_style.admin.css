@@ -1,0 +1,9 @@
+.breakpoint-settings {
+  /*width: 100%;*/
+}
+.breakpoint-settings td {
+  padding: 5px;
+}
+.breakpoint-settings select {
+  padding: 5px 20px 5px 5px;
+}

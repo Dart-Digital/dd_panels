@@ -1,0 +1,7 @@
+name = DD Flexible Style - Background Image
+description = Adds background image functionality to DD Flexible Style style plugin.
+core = 7.x
+version = "7.x-1.0"
+package = DD Panels
+dependencies[] = image
+dependencies[] = dd_panels

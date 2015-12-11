@@ -1,0 +1,55 @@
+<?php
+
+/**
+ * Implements hook_dd_flexible_style_settings_form_alter().
+ */
+function dd_flexible_style_equalizer_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+  if ($type == 'column' || $type == 'pane') {
+    $breakpoints = $form['breakpoints']['#breakpoints'];
+
+    foreach ($breakpoints as $size => $label) {
+      $form['breakpoints'][$size]['equalizer'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Equalize'),
+        '#default_value' => (isset($style_settings[$size]['equalizer'])) ? $style_settings[$size]['equalizer'] : 0,
+        '#description' => t('Make this equal height to the other elements in the container.'),
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_dd_flexible_style_attributes_alter().
+ */
+function dd_flexible_style_equalizer_dd_flexible_style_attributes_alter(&$attributes, $settings, $info) {
+  $type = $info['type'];
+
+  if ($type == 'row' || $type == 'column') {
+    $attributes['data-equalizer'] = $info['region_id'];
+  }
+
+  if ($type == 'column' || $type == 'pane') {
+    $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
+
+    foreach ($breakpoints as $size => $breakpoint) {
+
+      if (!empty($settings[$size]['equalizer'])) {
+        $key = 'row-' . $info['details']['row'];
+
+        if ($type == 'pane') {
+          $key .= '-column-' . $info['details']['column'];
+        }
+
+        $attributes['data-equalizer-watch'] = $key;
+
+        $attributes['data-equalizer-mq'][] = $size;
+
+        dd_foundation_add_foundation_js('foundation.equalizer.js');
+      }
+    }
+  }
+
+  if (!empty($attributes['data-equalizer-mq'])) {
+    $attributes['data-equalizer-mq'] = implode(' ', $attributes['data-equalizer-mq']);
+  }
+}

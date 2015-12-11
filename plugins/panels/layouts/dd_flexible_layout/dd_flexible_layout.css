@@ -1,0 +1,40 @@
+
+.dd-row .panels-ipe-sort-container {
+  display: none;
+}
+
+.dd-column .panels-ipe-sort-container {
+  display: block;
+}
+
+
+.panels-ipe-editing .dd-flexible-layout {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.panels-ipe-editing .dd-flexible-layout .panels-ipe-placeholder h3 {
+  width: 250px;
+  font-size: 1.3em;
+  margin: .1em;
+  color: #000;
+}
+
+.panels-ipe-editing .dd-flexible-layout .dd-row {
+  border: 2px dashed #ffff00;
+}
+
+.panels-ipe-editing .dd-flexible-layout .dd-column {
+  border: 1px dashed #ffff00;
+}
+
+.panels-ipe-editing .no-content {
+  display: block;
+}
+
+.panels-ipe-editing .popup-wrapper {
+  display: block !important;
+  position: relative !important;
+  z-index: 0 !important;
+  visibility: visible !important;
+}

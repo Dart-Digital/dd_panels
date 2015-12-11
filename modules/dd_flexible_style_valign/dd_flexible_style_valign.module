@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * Implements hook_dd_flexible_style_settings_form_alter().
+ */
+function dd_flexible_style_valign_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+  if ($type == 'column' || $type == 'pane') {
+    $form['valign'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Vertical Align'),
+      '#default_value' => (isset($style_settings['valign'])) ? $style_settings['valign'] : 0,
+      '#description' => t('Vertically align this element in the center of the parent container.'),
+    );
+  }
+}
+
+/**
+ * Implements hook_dd_flexible_style_attributes_alter().
+ */
+function dd_flexible_style_valign_dd_flexible_style_attributes_alter(&$attributes, $settings, $info) {
+  $type = $info['type'];
+
+  if ($type == 'column' || $type == 'pane') {
+    if (!empty($settings['valign'])) {
+      $attributes['class'][] = "dd-valign";
+      drupal_add_js(drupal_get_path('module', 'dd_flexible_style_valign') . '/jquery.flexverticalcenter.js');
+      drupal_add_js(drupal_get_path('module', 'dd_flexible_style_valign') . '/dd_flexible_style_valign.js');
+    }
+  }
+}

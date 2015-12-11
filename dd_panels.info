@@ -1,0 +1,6 @@
+name = DD Panels
+description = Panels integration with Foundation
+core = 7.x
+version = "7.x-1.0"
+package = DD Panels
+dependencies[] = dd_foundation

@@ -1,0 +1,107 @@
+<?php
+
+/**
+ * Implements hook_dd_flexible_style_settings_form_alter().
+ */
+function dd_flexible_style_fade_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+  if ($type == 'column' || $type == 'pane') {
+    $form['fade'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Fade'),
+      '#default_value' => (isset($style_settings['fade'])) ? $style_settings['fade'] : 0,
+      '#description' => t(''),
+    );
+
+    $form['fade_in_duration'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Fade-in Duration'),
+      '#default_value' => (isset($style_settings['fade_in_duration'])) ? $style_settings['fade_in_duration'] : 300,
+      '#description' => t('The scroll distance (in pixels) that the fade in should take.'),
+      // Only make this visible when the fade checkbox is selected
+      '#states' => array(
+        'visible' => array(
+          ':input[name="settings[fade]"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
+
+    $form['fade_in_offset'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Fade-in Offset'),
+      '#default_value' => (isset($style_settings['fade_in_offset'])) ? $style_settings['fade_in_offset'] : 200,
+      '#description' => t('How soon after the element enters the screen should it start to fade in?'),
+      // Only make this visible when the fade checkbox is selected
+      '#states' => array(
+        'visible' => array(
+          ':input[name="settings[fade]"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
+
+    $form['fade_out_duration'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Fade-out Duration'),
+      '#default_value' => (isset($style_settings['fade_out_duration'])) ? $style_settings['fade_out_duration'] : 300,
+      '#description' => t('The scroll distance (in pixels) that the fade out should take.'),
+      // Only make this visible when the fade checkbox is selected
+      '#states' => array(
+        'visible' => array(
+          ':input[name="settings[fade]"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
+
+    $form['fade_out_offset'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Fade-out Offset'),
+      '#default_value' => (isset($style_settings['fade_out_offset'])) ? $style_settings['fade_out_offset'] : 200,
+      '#description' => t('How soon before the element leaves the screen should it start to fade out?'),
+      // Only make this visible when the fade checkbox is selected
+      '#states' => array(
+        'visible' => array(
+          ':input[name="settings[fade]"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
+  }
+}
+
+/**
+ * Implements hook_dd_flexible_style_attributes_alter().
+ */
+function dd_flexible_style_fade_dd_flexible_style_attributes_alter(&$attributes, $settings, $info) {
+  $type = $info['type'];
+  if (!empty($settings['fade'])) {
+
+    $path_to_scrollmagic = libraries_get_path('scrollmagic');
+
+    drupal_add_js($path_to_scrollmagic . '/lib/greensock/TweenMax.min.js', array('group' => JS_LIBRARY, 'weight' => 1));
+    drupal_add_js($path_to_scrollmagic . '/lib/greensock/TimelineMax.min.js', array('group' => JS_LIBRARY, 'weight' => 2));
+
+    // For production - use the two below.
+    drupal_add_js($path_to_scrollmagic . '/minified/ScrollMagic.min.js', array('group' => JS_LIBRARY, 'weight' => 3));
+    drupal_add_js($path_to_scrollmagic . '/minified/plugins/animation.gsap.min.js', array('group' => JS_LIBRARY, 'weight' => 4));
+
+    // For development - use the 3 below.
+    // drupal_add_js($path_to_scrollmagic . '/uncompressed/ScrollMagic.js', array('group' => JS_LIBRARY));
+    // drupal_add_js($path_to_scrollmagic . '/uncompressed/plugins/animation.gsap.js', array('group' => JS_LIBRARY));
+    // drupal_add_js($path_to_scrollmagic . '/uncompressed/plugins/debug.addIndicators.js', array('group' => JS_LIBRARY));
+
+    drupal_add_js(drupal_get_path('module', 'dd_flexible_style_fade') . '/js/dd-flexible-style-fade.js');
+
+    $attributes['class'][] = "fade";
+
+    if (isset($settings['fade_in_duration'])) {
+      $attributes['data-fade-in-duration'] = $settings['fade_in_duration'];
+    }
+    if (isset($settings['fade_in_offset'])) {
+      $attributes['data-fade-in-offset'] = $settings['fade_in_offset'];
+    }
+    if (isset($settings['fade_out_duration'])) {
+      $attributes['data-fade-out-duration'] = $settings['fade_out_duration'];
+    }
+    if (isset($settings['fade_out_offset'])) {
+      $attributes['data-fade-out-offset'] = $settings['fade_out_offset'];
+    }
+  }
+}

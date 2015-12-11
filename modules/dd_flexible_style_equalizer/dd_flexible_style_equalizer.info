@@ -1,0 +1,6 @@
+name = DD Flexible Style - Equalizer
+description = Adds equalizer settings to DD Flexible Style style plugin.
+core = 7.x
+version = "7.x-1.0"
+package = DD Panels
+dependencies[] = dd_panels

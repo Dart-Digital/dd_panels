@@ -1,0 +1,44 @@
+<?php
+
+/**
+ * Implements hook_dd_flexible_style_settings_form_alter().
+ */
+function dd_flexible_style_parallax_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+    if ($type == 'row') {
+
+      $form['parallax'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Parallax'),
+        '#default_value' => (isset($style_settings['parallax'])) ? $style_settings['parallax'] : 0,
+        '#description' => t(''),
+      );
+
+    }
+}
+
+/**
+ * Implements hook_dd_flexible_style_attributes_alter().
+ */
+function dd_flexible_style_parallax_dd_flexible_style_attributes_alter(&$attributes, $settings, $info) {
+  $type = $info['type'];
+  if (!empty($settings['parallax'])) {
+
+    $path_to_scrollmagic = libraries_get_path('scrollmagic');
+
+    drupal_add_js($path_to_scrollmagic . '/lib/greensock/TweenMax.min.js', array('group' => JS_LIBRARY, 'weight' => 1));
+    drupal_add_js($path_to_scrollmagic . '/lib/greensock/TimelineMax.min.js', array('group' => JS_LIBRARY, 'weight' => 2));
+
+    // For production - use the two below.
+    drupal_add_js($path_to_scrollmagic . '/minified/ScrollMagic.min.js', array('group' => JS_LIBRARY, 'weight' => 3));
+    drupal_add_js($path_to_scrollmagic . '/minified/plugins/animation.gsap.min.js', array('group' => JS_LIBRARY, 'weight' => 4));
+
+    // For development - use the 3 below.
+    // drupal_add_js($path_to_scrollmagic . '/uncompressed/ScrollMagic.js', array('group' => JS_LIBRARY));
+    // drupal_add_js($path_to_scrollmagic . '/uncompressed/plugins/animation.gsap.js', array('group' => JS_LIBRARY));
+    // drupal_add_js($path_to_scrollmagic . '/uncompressed/plugins/debug.addIndicators.js', array('group' => JS_LIBRARY));
+
+    drupal_add_js(drupal_get_path('module', 'dd_flexible_style_parallax') . '/js/dd-flexible-style-parallax.js');
+
+    $attributes['class'][] = "dd-flexible-style-parallax";
+  }
+}

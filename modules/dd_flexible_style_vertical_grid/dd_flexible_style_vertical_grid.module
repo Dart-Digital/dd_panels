@@ -1,0 +1,73 @@
+<?php
+
+/**
+ * Implements hook_dd_flexible_style_settings_form_alter().
+ */
+function dd_flexible_style_vertical_grid_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+
+  $breakpoints = $form['breakpoints']['#breakpoints'];
+  $inherit = $form['breakpoints']['#inherit'];
+
+  $num_rows = variable_get('dd_flexible_style_num_rows', 12);
+
+  foreach ($breakpoints as $size => $label) {
+
+    $form['breakpoints'][$size]['vgrid_rows'] = array(
+      '#type' => 'select',
+      '#title' => t('Minimum height'),
+      '#options' => $inherit[$size] + drupal_map_assoc(range(0, $num_rows)),
+      '#default_value' => $style_settings[$size]['vgrid_rows'],
+    );
+
+    if ($type == 'column' || $type == 'pane') {
+      $form['breakpoints'][$size]['vgrid_offset_top'] = array(
+        '#type' => 'select',
+        '#title' => t('Margin Top'),
+        '#options' => $inherit[$size] + drupal_map_assoc(range(0, $num_rows - 1)),
+        '#default_value' => $style_settings[$size]['vgrid_offset_top'],
+      );
+
+      $form['breakpoints'][$size]['vgrid_offset_bottom'] = array(
+        '#type' => 'select',
+        '#title' => t('Margin Bottom'),
+        '#options' => $inherit[$size] + drupal_map_assoc(range(0, $num_rows - 1)),
+        '#default_value' => $style_settings[$size]['vgrid_offset_bottom'],
+      );
+    }
+
+  }
+}
+
+/**
+ * Implements hook_dd_flexible_style_attributes_alter().
+ */
+function dd_flexible_style_vertical_grid_dd_flexible_style_attributes_alter(&$attributes, $settings, $info) {
+  $type = $info['type'];
+
+  $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
+
+  $vgrid = FALSE;
+
+  foreach ($breakpoints as $size => $breakpoint) {
+    if (isset($settings[$size]['vgrid_rows']) && is_numeric($settings[$size]['vgrid_rows'])) {
+      $attributes['class'][] = "vgrid-$size-{$settings[$size]['vgrid_rows']}";
+      $vgrid = TRUE;
+    }
+
+    if ($type == 'column' || $type == 'pane') {
+      if (isset($settings[$size]['vgrid_offset_top']) && is_numeric($settings[$size]['vgrid_offset_top'])) {
+        $attributes['class'][] = "vgrid-$size-offset-top-{$settings[$size]['vgrid_offset_top']}";
+        $vgrid = TRUE;
+      }
+
+      if (isset($settings[$size]['vgrid_offset_bottom']) && is_numeric($settings[$size]['vgrid_offset_bottom'])) {
+        $attributes['class'][] = "vgrid-$size-offset-bottom-{$settings[$size]['vgrid_offset_bottom']}";
+        $vgrid = TRUE;
+      }
+    }
+  }
+
+  if ($vgrid) {
+    $attributes['class'][] = "vgrid";
+  }
+}

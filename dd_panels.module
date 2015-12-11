@@ -1,0 +1,453 @@
+<?php
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function dd_panels_ctools_plugin_directory($owner, $plugin_type) {
+  switch ("$owner:$plugin_type") {
+    case 'panels:layouts':
+      return "plugins/panels/layouts";
+    case 'panels:styles':
+      return "plugins/panels/styles";
+    case 'ctools:content_types':
+      return "plugins/ctools/content_types";
+  }
+  return NULL;
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function dd_panels_entity_info_alter(&$entity_info) {
+  if (!isset($entity_info['fieldable_panels_pane'])) {
+    return;
+  }
+  foreach ($entity_info['fieldable_panels_pane']['bundles'] as $bundle => &$info) {
+    $info['pane category'] = t('New content');
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function dd_panels_theme() {
+  $return = array();
+
+  $return['dd_panels_dd_flexible_style_breakpoints_table'] = array(
+    'render element' => 'element',
+  );
+
+  return $return;
+}
+
+/**
+ * Implements hook_panels_display_save().
+ *
+ * Force each region in the panel to use our style. This is dodgy but I can't
+ * find a hook to get in earlier.
+ */
+function dd_panels_panels_display_save($display) {
+  if ($display->layout != 'dd_flexible_layout') {
+    return;
+  }
+
+  $force_update = FALSE;
+  $panel_settings = &$display->panel_settings;
+
+  foreach ($display->panels as $region_id => $region) {
+    // Check if the style is not 'dd_flexible_style' and force it.
+    if (empty($panel_settings[$region_id]) || $panel_settings[$region_id]['style'] != 'dd_flexible_style'|| !isset($panel_settings['style_settings'][$region_id])) {
+      // Force an update to happen.
+      $force_update = TRUE;
+      // Force the region style to be 'dd_flexible_style'.
+      $panel_settings[$region_id]['style'] = 'dd_flexible_style';
+      $panel_settings['style_settings'][$region_id] = array();
+    }
+  }
+
+  if (!$force_update) {
+    // Nothing to do because they're all set correctly.
+    return;
+  }
+
+  $update = (isset($display->did) && is_numeric($display->did)) ? array('did') : array();
+  if (empty($display->uuid) || !ctools_uuid_is_valid($display->uuid)) {
+    $display->uuid = ctools_uuid_generate();
+  }
+  drupal_write_record('panels_display', $display, $update);
+}
+
+/**
+ * Implements hook_panels_pane_insert().
+ */
+function dd_panels_panels_pane_insert($pane) {
+  dd_panels_force_pane_style($pane);
+}
+
+/**
+ * Implements hook_panels_pane_update().
+ */
+function dd_panels_panels_pane_update($pane) {
+  dd_panels_force_pane_style($pane);
+}
+
+/**
+ * Force a pane to use the dd_flexible_style plugin so it doesn't break in-place editor links.
+ */
+function dd_panels_force_pane_style($pane) {
+  // It would be nice to know what layout we were using. Unfortunately we don't
+  // have that information here.
+  if (!isset($pane->style['style']) || $pane->style['style'] != 'dd_flexible_style' || !isset($pane->style['settings'])) {
+    // Force the region style to be 'dd_flexible_style'.
+    $pane->style['style'] = 'dd_flexible_style';
+    $pane->style['settings'] = array();
+
+    drupal_write_record('panels_pane', $pane, is_numeric($pane->pid) ? array('pid') : array());
+  }
+}
+
+/**
+ * Implements hook_preprocess().
+ *
+ * This preprocesses the dd_flexible_layout panels and takes the settings from the main
+ * rows and adds them to a wrapper container.
+ */
+function dd_panels_preprocess_dd_flexible_layout(&$variables) {
+
+  dd_foundation_add_foundation_js('foundation.reveal.js');
+
+  $plugin_path = drupal_get_path('module', 'dd_panels') . '/plugins/panels/layouts/dd_flexible_layout/';
+
+  drupal_add_js($plugin_path . 'popup/popup.js');
+
+  $variables['popup'] = $variables['content']['popup'];
+  $variables['popup_2'] = $variables['content']['popup_2'];
+  $variables['popup_3'] = $variables['content']['popup_3'];
+  unset($variables['content']['popup']);
+  unset($variables['content']['popup_2']);
+  unset($variables['content']['popup_3']);
+
+  $regions = array();
+  $panel_settings = $variables['display']->panel_settings;
+  foreach ($variables['content'] as $key => $region) {
+    $details = dd_panels_get_region_type($key);
+    $row = 'row-' . $details['row'];
+    // Initialise the attributes string in case we don't get any settings.
+    $attributes = array();
+    if (isset($panel_settings[$key]['style']) && $panel_settings[$key]['style'] == 'dd_flexible_style') {
+
+      $style_settings = $panel_settings['style_settings'][$key];
+
+      $display = $variables['display'];
+
+      $attributes = dd_flexible_style_attributes($style_settings, $details['type'], $key, $display);
+
+      if (empty($style_settings['force_show'])) {
+
+        // Get a list of all the regions 'inside' this one. That way we can add a
+        // class if they are all empty so we can hide them for admins until needed.
+        $child_regions = dd_panels_get_child_regions($key);
+
+        $empty = TRUE;
+        foreach ($child_regions as $child_region) {
+          if (!empty($display->renderer_handler->prepared['regions'][$child_region]['pids'])) {
+            $empty = FALSE;
+          }
+        }
+
+        if ($empty) {
+          $attributes['class'] .= ' no-content';
+        }
+      }
+
+    }
+    if ($details['type'] == 'row') {
+      $regions[$row]['content'] = $region;
+      unset($variables['content'][$key]);
+      $regions[$row]['attributes'] = $attributes;
+    }
+    else if ($details['type'] == 'column') {
+      $regions[$row]['columns'][$key]['content'] = $region;
+      $regions[$row]['columns'][$key]['attributes'] = $attributes;
+      unset($variables['content'][$key]);
+    }
+  }
+  $variables['regions'] = $regions;
+}
+
+/**
+ * Get a list of all the regions 'inside' this one.
+ *
+ * @param $region_id
+ * @return mixed
+ */
+function dd_panels_get_child_regions($region_id) {
+
+  $regions = &drupal_static(__FUNCTION__, array());
+
+  // If we've already calculated the regions, return them.
+  if (isset($regions[$region_id])) {
+    return $regions[$region_id];
+  }
+
+  $all_regions = dd_flexible_layout_generate_regions();
+  foreach ($all_regions as $id => $region) {
+    $regions[$id][$id] = $id;
+
+    $details = dd_panels_get_region_type($id);
+
+    if ($details['type']  == 'column') {
+      continue;
+    }
+
+    $columns = dd_flexible_layout_generate_sub_regions($details['row']);
+    foreach ($columns as $column_id => $column) {
+      $regions[$id][$column_id] = $column_id;
+    }
+  }
+
+  return $regions[$region_id];
+
+}
+
+function dd_panels_get_region_type($region_id) {
+  $details = array('type' => FALSE);
+  $matches = array();
+  preg_match('/(?:row-([0-9]+))(?:-column-([0-9]+))?(?:-pane-([0-9]+))?/', $region_id, $matches);
+  if (isset($matches[3])) {
+    $details['type'] = 'pane';
+    $details['row'] = $matches[1];
+    $details['column'] = $matches[2];
+    $details['pane'] = $matches[3];
+  }
+  elseif (isset($matches[2])) {
+    $details['type'] = 'column';
+    $details['row'] = $matches[1];
+    $details['column'] = $matches[2];
+  }
+  elseif (isset($matches[1])) {
+    $details['type'] = 'row';
+    $details['row'] = $matches[1];
+  }
+  else {
+    $details['type'] = 'unknown';
+    $details['row'] = FALSE;
+  }
+  return $details;
+}
+
+function dd_flexible_style_attributes($settings, $type, $region_id, $display) {
+
+  if (empty($settings)) {
+    $settings = array();
+  }
+
+  $info = array(
+    'type' => $type,
+    'region_id' => $region_id,
+    'display' => $display,
+    'details' => dd_panels_get_region_type($region_id),
+  );
+
+  $attributes = array();
+
+  $attributes['id'] = $region_id;
+
+  $default_settings = dd_panels_dd_flexible_style_default_settings($type);
+  $settings = array_replace_recursive($default_settings, $settings);
+
+  $attributes['class'][] = 'dd-' . $type;
+
+  drupal_alter('dd_flexible_style_attributes', $attributes, $settings, $info);
+
+  if (isset($attributes['styles'])) {
+    $attributes['style'] = implode(' ', $attributes['styles']);
+  }
+
+  if (isset($attributes['class'])) {
+    $attributes['class'] = implode(' ', $attributes['class']);
+  }
+
+  return $attributes;
+}
+
+function dd_panels_dd_flexible_style_default_settings($type) {
+
+  $settings = array();
+
+  $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
+
+  foreach ($breakpoints as $size => $breakpoint) {
+    $settings[$size] = array();
+  }
+
+  drupal_alter('dd_flexible_style_default_settings', $settings, $type);
+
+  return $settings;
+}
+
+function dd_panels_dd_flexible_style_get_breakpoints() {
+  return array(
+    'small' => array(
+      'label' => t('Small'),
+      'min-width' => 0,
+      'max-width' => 640,
+    ),
+    'medium' => array(
+      'label' => t('Medium'),
+      'min-width' => 641,
+      'max-width' => 1024,
+    ),
+    'large' => array(
+      'label' => t('Large'),
+      'min-width' => 1025,
+      'max-width' => 1440,
+    ),
+  );
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function dd_panels_form_panels_edit_style_type_form_alter(&$form, &$form_state) {
+  // Force the default to be DD Flexible Style.
+  $form['style']['#default_value'] = 'dd_flexible_style';
+  $form['style']['#options'] = array('dd_flexible_style' => 'DD Flexible Style');
+}
+
+/**
+ * Implements hook_panels_new_pane_alter().
+ *
+ * Set the default style to dd_flexible_style.
+ */
+function dd_panels_panels_new_pane_alter(&$pane) {
+  $pane->style['style'] = 'dd_flexible_style';
+}
+
+function dd_panels_preprocess_panels_ipe_toolbar(&$variables) {
+  drupal_add_css(drupal_get_path('module', 'dd_panels') . '/css/dd_panels_ipe.css');
+}
+
+function dd_panels_panels_ipe_pane_links_alter(&$links, $context) {
+  $renderer = $context['renderer'];
+
+  // Remove the existing style link which allows the user to choose the type.
+//  unset($links['style']);
+
+  $pane = $context['pane'];
+  // Add option to configure style in IPE
+  if (user_access('administer panels styles')) {
+    $links['style'] = array(
+      'title' => '<span>' . t('Style') . '</span>',
+      'href' => $renderer->get_url('style-settings', 'pane', $pane->pid),
+      'html' => TRUE,
+      'attributes' => array(
+        'class' => array('ctools-use-modal', 'panels-ipe-hide-bar'),
+        'title' => t('Style'),
+      ),
+    );
+  }
+}
+
+function dd_panels_panels_ipe_region_links_alter(&$links, $context) {
+
+  $renderer = $context['renderer'];
+  $region_id = $context['region_id'];
+
+  // Remove the existing style link which allows the user to choose the type.
+  unset($links['style']);
+
+  // Add option to configure style in IPE
+  if (user_access('administer panels styles')) {
+    $links['style'] = array(
+      'title' => '<span>' . t('Region style') . '</span>',
+      'href' => $renderer->get_url('style-settings', 'region', $region_id),
+      'html' => TRUE,
+      'attributes' => array(
+        'class' => array('ctools-use-modal', 'panels-ipe-hide-bar', 'style'),
+        'title' => t('Region style'),
+      ),
+    );
+  }
+
+  // Unset the add content link for main regions.
+  $details = dd_panels_get_region_type($region_id);
+  if ($details['type'] == 'row') {
+    unset($links['add-pane']);
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function dd_panels_form_fieldable_panels_panes_fieldable_panels_pane_content_type_edit_form_alter(&$form, &$form_state, $form_id) {
+  dd_panels_form_fieldable_panels_panes_entity_edit_form_alter($form, $form_state);
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Alter the fieldable_panels_panes_entity_edit_form forms.
+ */
+function dd_panels_form_fieldable_panels_panes_entity_edit_form_alter(&$form, &$form_state, $form_id) {
+  $entity = $form_state['entity'];
+
+  $entity_info = entity_get_info('fieldable_panels_pane');
+  $bundle_info = $entity_info['bundles'][$form['#bundle']];
+
+  $form['view_mode']['#access'] = FALSE;
+
+  $form['link']['#access'] = FALSE;
+  $form['title']['#access'] = FALSE;
+
+  // Make 'reusable' unchecked by default unless this is an existing entity.
+  if (empty($entity->fpid)) {
+    $form['reusable']['reusable']['#default_value'] = FALSE;
+  }
+  // Else is it's an existing entity and it's reusable, warn the user.
+  elseif (!empty($entity->reusable)) {
+    $form['reusable_warning'] = array(
+      '#markup' => '<h2 class="warning">Beware: You are editing some content that may be used on other pages.</h2>',
+      '#weight' => -999,
+    );
+  }
+
+  // Hide the category field and set the value to the bundle.
+  $form['reusable']['category']['#readonly'] = 'readonly';
+  $form['reusable']['category']['#disabled'] = 'disabled';
+  $form['reusable']['category']['#default_value'] = $bundle_info['label'];
+  $form['reusable']['category']['#value'] = $bundle_info['label'];
+
+  $form['reusable']['admin_description']['#access'] = FALSE;
+
+  $form['redirect']['#access'] = FALSE;
+  $form['revision']['#access'] = FALSE;
+}
+
+function theme_dd_panels_dd_flexible_style_breakpoints_table($variables) {
+  $element = $variables['element'];
+  $breakpoints = $element['#breakpoints'];
+
+  // Render the table
+  $header = array(
+    'setting' => t('Setting'),
+  );
+
+  $rows = array();
+  foreach ($breakpoints as $size => $label) {
+    $header[$size] = $label;
+
+    foreach (element_children($element[$size]) as $field) {
+      $rows[$field]['title'] = $element[$size][$field]['#title'];
+      unset($element[$size][$field]['#title']);
+      $rows[$field][$size] = drupal_render($element[$size][$field]);
+    }
+  }
+
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('breakpoint-settings'))));
+
+  // Render everything else
+  $output .= drupal_render_children($element);
+
+  return $output;
+}

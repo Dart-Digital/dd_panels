@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * Implements hook_dd_flexible_style_settings_form_alter().
+ */
+function dd_flexible_style_slider_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+  if ($type == 'column') {
+    $form['breakpoints']['slider'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Slider (carousel)'),
+      '#default_value' => (isset($style_settings['slider'])) ? $style_settings['slider'] : 0,
+      '#description' => t('Turn all panes in this region into a slider (carousel).'),
+    );
+  }
+}
+
+/**
+ * Implements hook_dd_flexible_style_attributes_alter().
+ */
+function dd_flexible_style_slider_dd_flexible_style_attributes_alter(&$attributes, $settings, $info) {
+  $type = $info['type'];
+
+  if ($type == 'column') {
+    if (!empty($settings['slider'])) {
+      // TODO: Make these options fields on the pane so it can be customizable.
+      $attributes['data-slick'] = '{"slidesToShow": 1, "slidesToScroll": 1, "adaptiveHeight": true}';
+      $attributes['class'][] = "dd-flexible-style-slider";
+
+      $path_to_slick = libraries_get_path('slick');
+
+      drupal_add_css($path_to_slick . '/slick/slick.css');
+
+      drupal_add_js($path_to_slick . '/slick/slick.min.js', array('group' => JS_LIBRARY));
+      drupal_add_js(drupal_get_path('module', 'dd_flexible_style_slider') . '/js/dd-flexible-style-slider.js');
+    }
+  }
+
+}

@@ -1,0 +1,6 @@
+name = DD Flexible Style - Slider
+description = Turn all panels within a region use a slider.
+core = 7.x
+version = "7.x-1.0"
+package = DD Panels
+dependencies[] = dd_panels

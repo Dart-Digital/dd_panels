@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * Implements hook_dd_flexible_style_settings_form_alter().
+ */
+function dd_flexible_style_next_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+  if ($type == 'row') {
+    $form['next'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Add link to next row'),
+      '#default_value' => (isset($style_settings['next'])) ? $style_settings['next'] : 0,
+      '#description' => t('Add a arrow link to the bottom of the row which links to the next one.'),
+    );
+  }
+}
+
+/**
+ * Implements hook_preprocess().
+ */
+function dd_flexible_style_next_preprocess_dd_flexible_style(&$variables) {
+  if (!empty($variables['settings']['next'])) {
+    $type = dd_panels_get_region_type($variables['region_id']);
+    $next_row = $type['row'] + 1;
+    $variables['suffix'] .= '<div class="next-row"><a href="#row-' . $next_row . '" class="dpn-icon-select"></a></div>';
+  }
+}

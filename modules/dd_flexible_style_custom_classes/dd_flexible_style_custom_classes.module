@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * Implements hook_dd_flexible_style_settings_form_alter().
+ */
+function dd_flexible_style_custom_classes_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+  $form['custom_classes'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Custom classes'),
+    '#default_value' => $style_settings['custom_classes'],
+  );
+}
+
+/**
+ * Implements hook_dd_flexible_style_attributes_alter().
+ */
+function dd_flexible_style_custom_classes_dd_flexible_style_attributes_alter(&$attributes, $settings, $info) {
+  $type = $info['type'];
+
+  if (!empty($settings['custom_classes'])) {
+    $attributes['class'][] = $settings['custom_classes'];
+  }
+}

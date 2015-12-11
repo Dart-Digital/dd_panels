@@ -1,0 +1,149 @@
+<?php
+
+/**
+ * Implements hook_image_default_styles().
+ */
+function dd_flexible_style_bg_image_default_styles() {
+  $styles = array();
+
+  $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
+
+  foreach ($breakpoints as $size => $breakpoint) {
+    $styles['dd_region_bg_' . $size] = array(
+      'label' => 'DD Region Background: ' . $breakpoint['label'],
+      'effects' => array(
+        1 => array(
+          'name' => 'image_scale',
+          'data' => array(
+            'width' => $breakpoint['max-width'],
+            'height' => '',
+            'upscale' => 0,
+          ),
+          'weight' => 1,
+        ),
+      ),
+    );
+  }
+
+  return $styles;
+}
+
+
+/**
+ * Implements hook_dd_flexible_style_settings_form_alter().
+ */
+function dd_flexible_style_bg_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+
+  $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
+  $inherit = $form['breakpoints']['#inherit'];
+
+  $background_positions = array(
+    'left-top' => t('Left Top'),
+    'center-top' => t('Center Top'),
+    'right-top' => t('Right Top'),
+    'left-center' => t('Left Center'),
+    'center-center' => t('Center Center'),
+    'right-center' => t('Right Center'),
+    'left-bottom' => t('Left Bottom'),
+    'center-bottom' => t('Center Bottom'),
+    'right-bottom' => t('Right Bottom'),
+  );
+
+  if ($type == 'row') {
+    $classes = variable_get('dd_flexible_style_bg_classes', array());
+
+    $form['bg_class'] = array(
+      '#type' => 'select',
+      '#title' => t('Background colour'),
+      '#options' => $classes,
+      '#default_value' => (isset($style_settings['bg_class'])) ? $style_settings['bg_class'] : '',
+      '#description' => t('Choose a background colour. This will also affect the font colours to ensure they are readable against the background.'),
+    );
+
+    foreach ($breakpoints as $size => $breakpoint) {
+      $form['breakpoints'][$size]['bg_image'] = array(
+        '#type' => 'media',
+        '#tree' => TRUE, // Required
+        '#title' => t('Background Image'),
+        '#media_options' => array(
+          'global' => array(
+            'file_extensions' => 'jpg jpeg png gif', // File extensions
+            'max_filesize' => '12 MB',
+            // 'file_directory' => 'audio', // Will be a subdirectory of the files directory
+            'types' => array('image'), // Refers to a file_entity bundle (such as audio, video, image, etc.)
+          ),
+        ),
+        '#required' => FALSE,
+      );
+
+      if (!empty($style_settings[$size]['bg_image'])) {
+        $form['breakpoints'][$size]['bg_image']['#default_value'] = $style_settings[$size]['bg_image'];
+      }
+
+      $form['breakpoints'][$size]['bg_position'] = array(
+        '#type' => 'select',
+        '#title' => t('Background position'),
+        '#options' => $inherit[$size] + $background_positions,
+        '#default_value' => (isset($style_settings[$size]['bg_position'])) ? $style_settings[$size]['bg_position'] : '',
+      );
+
+    }
+  }
+}
+
+/**
+ * Implements hook_dd_flexible_style_attributes_alter().
+ */
+function dd_flexible_style_bg_dd_flexible_style_attributes_alter(&$attributes, $settings, $info) {
+  $type = $info['type'];
+
+  // Apply settings that only should be done on rows.
+  if ($type == 'row') {
+    $attributes['class'][] = 'region-bg';
+
+    if (isset($settings['bg_class'])) {
+      $attributes['class'][] = $settings['bg_class'];
+    }
+
+    $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
+
+    $interchange = array();
+
+    foreach ($breakpoints as $size => $breakpoint) {
+
+      // The reason we do this in two steps is that, like most other settings
+      // for different breakpoints, we assume they apply to all larger sizes
+      // unless specific settings have been set for those. For example if a
+      // bg image is set for small only, it will apply to small, medium, and
+      // large. If it's set for small and large, then the small version will
+      // apply for small and medium, and the large version will appear for
+      // large.
+      if (!empty($settings[$size]['bg_image'])) {
+        $file = file_load($settings[$size]['bg_image']);
+      }
+
+      if (isset($file)) {
+        $url = image_style_url('dd_region_bg_' . $size, $file->uri);
+        $interchange[] = "[{$url}, ({$size})]";
+
+        if (!empty($settings[$size]['bg_position'])) {
+          $attributes['class'][] = $size . '-background-position-' . $settings[$size]['bg_position'];
+        }
+
+      }
+
+    }
+    if (!empty($interchange)) {
+      dd_foundation_add_foundation_js('foundation.interchange.js');
+      $attributes['data-interchange'] = implode(', ', $interchange);
+      $attributes['class'][] = 'region-bg-image';
+    }
+  }
+}
+
+/**
+ * Implements hook_dd_flexible_style_default_settings_alter().
+ */
+function dd_flexible_style_bg_dd_flexible_style_default_settings_alter(&$settings, $type) {
+  $settings['small']['bg_position'] = 'center-center';
+}

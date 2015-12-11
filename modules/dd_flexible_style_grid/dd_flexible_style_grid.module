@@ -1,0 +1,111 @@
+<?php
+
+/**
+ * Implements hook_dd_flexible_style_settings_form_alter().
+ */
+function dd_flexible_style_grid_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+
+  $breakpoints = $form['breakpoints']['#breakpoints'];
+  $inherit = $form['breakpoints']['#inherit'];
+
+  $num_columns = variable_get('dd_flexible_style_num_columns', 12);
+
+  $first = TRUE;
+
+  if ($type == 'column' || $type == 'pane') {
+
+    foreach ($breakpoints as $size => $label) {
+
+      $form['breakpoints'][$size]['columns_num'] = array(
+        '#type' => 'select',
+        '#title' => t('No. of columns'),
+        '#options' =>
+          $inherit[$size] +
+          drupal_map_assoc(range(1, $num_columns)) +
+          array('full-width' => t('Entire screen')),
+        '#default_value' => $style_settings[$size]['columns_num'],
+      );
+
+      // We only want to show this field once.
+      if ($first) {
+        $form['breakpoints'][$size]['column_end'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Last Column'),
+          '#default_value' => $style_settings[$size]['column_end'],
+        );
+      }
+      else {
+        $form['breakpoints'][$size]['column_end'] = array(
+          '#type' => 'markup',
+          '#title' => t('Last Column'),
+          '#markup' => '&nbsp;',
+        );
+      }
+
+      $form['breakpoints'][$size]['columns_offset'] = array(
+        '#type' => 'select',
+        '#title' => t('Left margin'),
+        '#options' => $inherit[$size] + drupal_map_assoc(range(0, $num_columns - 1)),
+        '#default_value' => $style_settings[$size]['columns_offset'],
+      );
+
+      $form['breakpoints'][$size]['hide'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Hide'),
+        '#default_value' => $style_settings[$size]['hide'],
+      );
+
+      $first = FALSE;
+
+    }
+  }
+}
+
+/**
+ * Implements hook_dd_flexible_style_attributes_alter().
+ */
+function dd_flexible_style_grid_dd_flexible_style_attributes_alter(&$attributes, $settings, $info) {
+  $type = $info['type'];
+
+  $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
+
+  if ($type == 'column' || $type == 'pane') {
+    $attributes['class'][] = 'columns';
+
+    foreach ($breakpoints as $size => $breakpoint) {
+      if (!empty($settings[$size]['columns_num'])) {
+        $attributes['class'][] = $size . '-' . $settings[$size]['columns_num'];
+      }
+
+      if (!empty($settings[$size]['column_end'])) {
+        $attributes['class'][] = "end";
+      }
+
+      if (isset($settings[$size]['columns_offset']) && is_numeric($settings[$size]['columns_offset'])) {
+        $attributes['class'][] = $size . '-offset-' . $settings[$size]['columns_offset'];
+      }
+
+      if (!empty($settings[$size]['hide'])) {
+        $attributes['class'][] = "hide-for-$size-only";
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_dd_flexible_style_default_settings_alter().
+ */
+function dd_flexible_style_grid_dd_flexible_style_default_settings_alter(&$settings, $type) {
+
+  $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
+
+  $first = TRUE;
+  foreach ($breakpoints as $size => $breakpoint) {
+    if ($first) {
+      $settings[$size]['columns_num'] = variable_get('dd_flexible_style_num_columns', 12);
+    }
+
+    $first = FALSE;
+  }
+
+}

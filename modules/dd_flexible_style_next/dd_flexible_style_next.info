@@ -1,0 +1,6 @@
+name = DD Flexible Style - Next row
+description = Add a arrow to the bottom of a row to scroll to next row.
+core = 7.x
+version = "7.x-1.0"
+package = DD Panels
+dependencies[] = dd_panels
