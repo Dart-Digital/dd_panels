@@ -10,6 +10,17 @@ function dd_flexible_style_grid_dd_flexible_style_settings_form_alter(&$form, &$
 
   $num_columns = variable_get('dd_flexible_style_num_columns', 12);
 
+  if ($type == 'row') {
+
+    $form['full_width'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Full width'),
+      '#default_value' => $style_settings['full_width'],
+      '#description' => t("Don't limit the width of this row to allow the contents to take the full width of the screen."),
+    );
+
+  }
+
   $first = TRUE;
 
   if ($type == 'column' || $type == 'pane') {
@@ -21,8 +32,7 @@ function dd_flexible_style_grid_dd_flexible_style_settings_form_alter(&$form, &$
         '#title' => t('No. of columns'),
         '#options' =>
           $inherit[$size] +
-          drupal_map_assoc(range(1, $num_columns)) +
-          array('full-width' => t('Entire screen')),
+          drupal_map_assoc(range(1, $num_columns)),
         '#default_value' => $style_settings[$size]['columns_num'],
       );
 
@@ -75,6 +85,12 @@ function dd_flexible_style_grid_dd_flexible_style_attributes_alter(&$attributes,
   $largest = key($breakpoints);
   // Now we reset the breakpoints array to the beginning.
   reset($breakpoints);
+
+  if ($type == 'row') {
+    if (!empty($settings['full_width'])) {
+      $attributes['class'][] = 'full-width';
+    }
+  }
 
   if ($type == 'column' || $type == 'pane') {
     $attributes['class'][] = 'columns';
