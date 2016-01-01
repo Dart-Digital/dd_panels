@@ -391,7 +391,6 @@ function dd_panels_form_fieldable_panels_panes_fieldable_panels_pane_content_typ
  */
 function dd_panels_form_fieldable_panels_panes_entity_edit_form_alter(&$form, &$form_state, $form_id) {
   $entity = $form_state['entity'];
-
   $entity_info = entity_get_info('fieldable_panels_pane');
   $bundle_info = $entity_info['bundles'][$form['#bundle']];
 
@@ -422,6 +421,7 @@ function dd_panels_form_fieldable_panels_panes_entity_edit_form_alter(&$form, &$
 
   $form['redirect']['#access'] = FALSE;
   $form['revision']['#access'] = FALSE;
+
 }
 
 function theme_dd_panels_dd_flexible_style_breakpoints_table($variables) {
