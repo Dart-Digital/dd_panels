@@ -69,6 +69,13 @@ function dd_flexible_style_grid_dd_flexible_style_attributes_alter(&$attributes,
 
   $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
 
+  // Get the largest breakpoint. It's used for hiding elements on the largest
+  // and above. We assume that the last element in the array is the largest.
+  end($breakpoints);
+  $largest = key($breakpoints);
+  // Now we reset the breakpoints array to the beginning.
+  reset($breakpoints);
+
   if ($type == 'column' || $type == 'pane') {
     $attributes['class'][] = 'columns';
 
@@ -86,7 +93,12 @@ function dd_flexible_style_grid_dd_flexible_style_attributes_alter(&$attributes,
       }
 
       if (!empty($settings[$size]['hide'])) {
-        $attributes['class'][] = "hide-for-$size-only";
+        if ($size != $largest) {
+          $attributes['class'][] = "hide-for-$size-only";
+        }
+        else {
+          $attributes['class'][] = "hide-for-$size-up";
+        }
       }
     }
   }
