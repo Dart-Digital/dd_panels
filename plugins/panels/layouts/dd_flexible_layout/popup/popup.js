@@ -16,7 +16,7 @@
     attach: function(context, settings) {
 
       var popups = Drupal.behaviors.dd_flexible_layout_popup.popups;
-      $('.popup-wrapper').hide();
+      $('.popup-wrapper').once('dd-popup').hide();
 
       for(var key in popups) {
         $('.' + key).once('popup').each(function() {
