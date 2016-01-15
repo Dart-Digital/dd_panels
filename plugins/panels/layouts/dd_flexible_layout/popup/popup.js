@@ -24,8 +24,6 @@
         });
       }
 
-      $(document).foundation('reveal', 'reflow');
-
       $(document).on('opened.fndtn.reveal', '[data-reveal]', function () {
         if (Drupal.behaviors.dd_flexible_layout_popup.isOurPopup($(this))) {
           $('body').addClass('popup-open');
