@@ -124,12 +124,11 @@ function dd_flexible_style_bg_dd_flexible_style_attributes_alter(&$attributes, $
 
       if (isset($file)) {
         $url = image_style_url('dd_region_bg_' . $size, $file->uri);
-        $interchange[] = "[{$url}, ({$size})]";
+        $interchange[] = "[{$url}, {$size}]";
+      }
 
-        if (!empty($settings[$size]['bg_position'])) {
-          $attributes['class'][] = $size . '-background-position-' . $settings[$size]['bg_position'];
-        }
-
+      if (!empty($settings[$size]['bg_position'])) {
+        $attributes['class'][] = $size . '-background-position-' . $settings[$size]['bg_position'];
       }
 
     }
