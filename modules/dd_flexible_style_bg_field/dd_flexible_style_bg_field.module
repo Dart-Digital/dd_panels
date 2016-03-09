@@ -1,0 +1,91 @@
+<?php
+
+/**
+ * Implements hook_dd_flexible_style_settings_form_alter().
+ */
+function dd_flexible_style_bg_field_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+
+  $fields = field_info_fields();
+
+  $image_fields = array(
+    'none' => t('None'),
+  );
+
+  foreach ($fields as $machine_name => $field) {
+    if ($field['type'] == 'image') {
+      $image_fields[$machine_name] = $machine_name;
+    }
+  }
+
+  $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
+  $inherit = $form['breakpoints']['#inherit'];
+
+  if ($type == 'row') {
+
+    foreach ($breakpoints as $size => $breakpoint) {
+      $options = $inherit[$size] + $image_fields;
+      $form['breakpoints'][$size]['bg_image_field'] = array(
+        '#type' => 'select',
+        '#tree' => TRUE, // Required
+        '#title' => t('Background Image Field'),
+        '#description' => t('Select a field to use as the background image.'),
+        '#options' => $options,
+        '#default_value' => $style_settings[$size]['bg_image_field'],
+        '#required' => FALSE,
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_dd_flexible_style_attributes_alter().
+ */
+function dd_flexible_style_bg_field_dd_flexible_style_attributes_alter(&$attributes, $settings, $info) {
+  $type = $info['type'];
+
+  // Apply settings that only should be done on rows.
+  if ($type == 'row') {
+
+    $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
+
+    $interchange = array();
+
+    foreach ($breakpoints as $size => $breakpoint) {
+
+      // The reason we do this in two steps is that, like most other settings
+      // for different breakpoints, we assume they apply to all larger sizes
+      // unless specific settings have been set for those. For example if a
+      // bg image is set for small only, it will apply to small, medium, and
+      // large. If it's set for small and large, then the small version will
+      // apply for small and medium, and the large version will appear for
+      // large.
+      if (!empty($settings[$size]['bg_image_field'])) {
+        $field = $settings[$size]['bg_image_field'];
+        $node = menu_get_object();
+        if (!empty($node)) {
+          if (!empty($node->{$field}) && !empty($node->{$field}[LANGUAGE_NONE])) {
+            $file = file_load($node->{$field}[LANGUAGE_NONE][0]['fid']);
+          }
+        }
+      }
+
+      if (isset($file)) {
+        $url = image_style_url('dd_region_bg_' . $size, $file->uri);
+        $interchange[] = "[{$url}, {$size}]";
+      }
+
+    }
+    if (!empty($interchange)) {
+      dd_foundation_add_foundation_js('foundation.interchange.js');
+      $attributes['data-interchange'] = implode(', ', $interchange);
+      $attributes['class'][] = 'region-bg-image';
+    }
+  }
+}
+
+/**
+ * Implements hook_dd_flexible_style_default_settings_alter().
+ */
+function dd_flexible_style_bg_field_dd_flexible_style_default_settings_alter(&$settings, $type) {
+  $style_settings['small']['bg_image_field'] = 'none';
+}
