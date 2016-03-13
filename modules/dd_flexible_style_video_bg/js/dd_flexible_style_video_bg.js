@@ -49,6 +49,7 @@
           self = Drupal.behaviors.dd_flexible_style_video_bg,
           region_id = $region.data('region-id'),
           video_bg_interchange = $region.data('video-bg'),
+          $video_bg_wrapper = false,
           webm = false,
           mp4 = false,
           playing = false,
@@ -67,11 +68,14 @@
         });
         $region.find('.video-bg-wrapper').remove();
         $region.removeClass('has-background-video');
-        $region.append("<div class='video-bg-wrapper'></div>");
 
         if (webm === false && mp4 === false ) {
           return;
         }
+
+        $region.append("<div class='video-bg-wrapper'></div>");
+
+        $video_bg_wrapper = $region.find('.video-bg-wrapper');
 
         var video = $('<video />', {
           id: region_id + '-video',
@@ -94,8 +98,6 @@
             type: 'video/mp4'
           }));
         }
-
-
 
         video.on("loadedmetadata", function () {
           video.data('width', this.videoWidth);
@@ -126,7 +128,8 @@
           $('.video-bg-wrapper').show();
         });
 
-        video.prependTo($region.find('.video-bg-wrapper'));
+        $video_bg_wrapper.prepend(video);
+        $video_bg_wrapper.append($('<div class="video-bg-overlay"></div>'));
 
       });
 
