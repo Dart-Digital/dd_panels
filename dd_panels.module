@@ -310,6 +310,10 @@ function dd_panels_dd_flexible_style_get_breakpoints() {
  * Implements hook_form_alter().
  */
 function dd_panels_form_panels_edit_style_type_form_alter(&$form, &$form_state) {
+  if ($form_state['display']->layout != 'dd_flexible_layout') {
+    return;
+  }
+
   // Force the default to be DD Flexible Style.
   $form['style']['#default_value'] = 'dd_flexible_style';
   $form['style']['#options'] = array('dd_flexible_style' => 'DD Flexible Style');
