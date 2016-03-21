@@ -24,7 +24,7 @@
   <?php endforeach; ?>
 
   <?php if (!empty($popup)): ?>
-  <div id="popup_1" class="popup-wrapper reveal-modal" data-reveal aria-hidden="true" role="dialog">
+  <div id="popup_1" class="popup-wrapper reveal" data-reveal aria-hidden="true" role="dialog">
     <div class="popup-inner row">
       <?php print $popup; ?>
     </div>
@@ -33,7 +33,7 @@
   <?php endif; ?>
 
   <?php if (!empty($popup_2)): ?>
-  <div id="popup_2" class="popup-wrapper reveal-modal" data-reveal aria-hidden="true" role="dialog">
+  <div id="popup_2" class="popup-wrapper reveal" data-reveal aria-hidden="true" role="dialog">
     <div class="popup-inner row">
       <div class="popup-content">
         <?php print $popup_2; ?>
@@ -44,7 +44,7 @@
   <?php endif; ?>
 
   <?php if (!empty($popup_3)): ?>
-  <div id="popup_3" class="popup-wrapper reveal-modal" data-reveal aria-hidden="true" role="dialog">
+  <div id="popup_3" class="popup-wrapper reveal" data-reveal aria-hidden="true" role="dialog">
     <div class="popup-inner row">
       <div class="popup-content">
         <?php print $popup_3; ?>

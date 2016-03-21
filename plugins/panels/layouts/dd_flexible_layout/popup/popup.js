@@ -20,7 +20,7 @@
 
       for(var key in popups) {
         $('.' + key).once('popup').each(function() {
-          $(this).attr('data-reveal-id', popups[key]);
+          $(this).attr('data-open', popups[key]);
         });
       }
 
