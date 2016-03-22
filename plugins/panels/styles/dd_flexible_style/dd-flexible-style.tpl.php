@@ -9,6 +9,4 @@
  */
 // We render the attributes of the array in the main dd-flexible-layout.tpl.php.
 ?>
-<?php print $prefix; ?>
 <?php print $content; ?>
-<?php print $suffix; ?>

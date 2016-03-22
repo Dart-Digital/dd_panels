@@ -6,20 +6,28 @@
 ?>
   <?php foreach ($regions as $id => $row): ?>
     <?php if (!empty($row['columns'])): ?>
-    <div<?php print drupal_attributes($row['attributes']); ?>>
-      <?php print $row['content']; ?>
-      <div class="row">
-        <?php foreach($row['columns'] as $key => $column): ?>
-          <?php if (!empty($column['content'])): ?>
-            <div<?php print drupal_attributes($column['attributes']); ?>>
-              <div class="row">
-                <?php print $column['content']; ?>
+      <?php print $row['prefix']; ?>
+      <div<?php print drupal_attributes($row['attributes']); ?>>
+        <?php print $row['inner_prefix']; ?>
+        <?php print $row['content']; ?>
+        <div class="row">
+          <?php foreach($row['columns'] as $key => $column): ?>
+            <?php if (!empty($column['content'])): ?>
+              <?php print $column['prefix']; ?>
+              <div<?php print drupal_attributes($column['attributes']); ?>>
+                <?php print $column['inner_prefix']; ?>
+                <div class="row">
+                  <?php print $column['content']; ?>
+                </div>
+                <?php print $column['inner_suffix']; ?>
               </div>
-            </div>
-          <?php endif; ?>
-        <?php endforeach; ?>
+              <?php print $column['suffix']; ?>
+            <?php endif; ?>
+          <?php endforeach; ?>
+        </div>
+        <?php print $row['inner_suffix']; ?>
       </div>
-    </div>
+      <?php print $row['suffix']; ?>
     <?php endif; ?>
   <?php endforeach; ?>
 

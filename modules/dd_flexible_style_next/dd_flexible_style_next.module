@@ -15,12 +15,12 @@ function dd_flexible_style_next_dd_flexible_style_settings_form_alter(&$form, &$
 }
 
 /**
- * Implements hook_preprocess().
+ * Implements hook_dd_flexible_style_wrappers_alter().
  */
-function dd_flexible_style_next_preprocess_dd_flexible_style(&$variables) {
-  if (!empty($variables['settings']['next'])) {
-    $type = dd_panels_get_region_type($variables['region_id']);
+function dd_flexible_style_next_dd_flexible_style_wrappers_alter(&$wrappers, $settings, $info) {
+  if (!empty($settings['next'])) {
+    $type = dd_panels_get_region_type($info['region_id']);
     $next_row = $type['row'] + 1;
-    $variables['suffix'] .= '<div class="next-row"><a href="#row-' . $next_row . '" class="dpn-icon-select"></a></div>';
+    $wrappers['inner_suffix_array'][] = '<div class="next-row"><a href="#row-' . $next_row . '"></a></div>';
   }
 }

@@ -64,6 +64,10 @@ function theme_dd_flexible_style_render_pane($vars) {
 
   $vars['attributes_array'] = dd_flexible_style_attributes($pane->style['settings'], 'pane', $pane->panel . '-pane-1', $display);
 
+  $wrappers = dd_flexible_style_wrappers($pane->style['settings'], 'pane', $pane->panel . '-pane-1', $display);
+
+  $vars = array_merge($vars, $wrappers);
+
   return theme('dd_flexible_style_pane', $vars);
 }
 
