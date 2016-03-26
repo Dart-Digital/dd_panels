@@ -71,3 +71,14 @@ function dd_flexible_style_vertical_grid_dd_flexible_style_attributes_alter(&$at
     $attributes['class'][] = "vgrid";
   }
 }
+
+/**
+ * Implements hook_dd_panels_dd_flexible_style_settings_form_alter();
+ */
+function dd_flexible_style_vertical_grid_dd_panels_dd_flexible_style_settings_form_alter(&$form, &$form_state) {
+  $form['dd_flexible_style_num_rows'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum rows'),
+    '#default_value' => variable_get('dd_flexible_style_num_rows', 12),
+  );
+}

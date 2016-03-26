@@ -16,6 +16,40 @@ function dd_panels_ctools_plugin_directory($owner, $plugin_type) {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function dd_panels_menu() {
+  $items = array();
+
+  $items['admin/config/content/dd_flexible_styles'] = array(
+    'title' => 'DD Flexible Styles settings',
+    'description' => 'Configure the DD Panels styles settings',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer dd_panels'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('dd_panels_dd_flexible_style_settings_form'),
+    'file' => 'dd_panels.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function dd_panels_permission() {
+  $return = array();
+
+  $return['administer dd_panels'] = array(
+    'title' => t('Administer DD Panels'),
+    'description' => t('Administer the DD Panels settings'),
+  );
+
+  return $return;
+}
+
+/**
  * Implements hook_entity_info_alter().
  */
 function dd_panels_entity_info_alter(&$entity_info) {

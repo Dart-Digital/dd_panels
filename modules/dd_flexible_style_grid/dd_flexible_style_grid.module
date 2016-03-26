@@ -137,3 +137,14 @@ function dd_flexible_style_grid_dd_flexible_style_default_settings_alter(&$setti
   }
 
 }
+
+/**
+ * Implements hook_dd_panels_dd_flexible_style_settings_form_alter();
+ */
+function dd_flexible_style_grid_dd_panels_dd_flexible_style_settings_form_alter(&$form, &$form_state) {
+  $form['dd_flexible_style_num_columns'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum columns'),
+    '#default_value' => variable_get('dd_flexible_style_num_columns', 12),
+  );
+}

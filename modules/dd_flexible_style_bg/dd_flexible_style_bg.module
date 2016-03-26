@@ -146,3 +146,46 @@ function dd_flexible_style_bg_dd_flexible_style_attributes_alter(&$attributes, $
 function dd_flexible_style_bg_dd_flexible_style_default_settings_alter(&$settings, $type) {
   $settings['small']['bg_position'] = 'center-center';
 }
+
+/**
+ * Implements hook_dd_panels_dd_flexible_style_settings_form_alter();
+ */
+function dd_flexible_style_bg_dd_panels_dd_flexible_style_settings_form_alter(&$form, &$form_state) {
+  $classes = variable_get('dd_flexible_style_bg_classes', array());
+  $classes_string = '';
+  foreach ($classes as $key => $value) {
+    $classes_string .= $key . '|' . $value . "\n";
+  }
+
+  $form['dd_flexible_style_bg_classes'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Background Classes'),
+    '#default_value' => $classes_string,
+ );
+
+}
+
+/**
+ * Implements hook_dd_panels_dd_flexible_style_settings_form_validate_alter();
+ */
+function dd_flexible_style_bg_dd_panels_dd_flexible_style_settings_form_validate_alter(&$form_id, &$form_values) {
+
+}
+
+/**
+ * Implements hook_dd_panels_dd_flexible_style_settings_form_submit_alter();
+ */
+function dd_flexible_style_bg_dd_panels_dd_flexible_style_settings_form_submit_alter($form, &$form_state) {
+
+  $classes = array();
+  $dd_flexible_style_bg_classes = $form_state['values']['dd_flexible_style_bg_classes'];
+  $dd_flexible_style_bg_classes = array_filter(explode("\n", trim($dd_flexible_style_bg_classes)), 'strlen');
+  foreach ($dd_flexible_style_bg_classes as $value) {
+    $value = explode('|', $value);
+    $classes[$value[0]] = $value[1];
+  }
+
+  // Alter the form state and the system_settings_form will do the rest.
+  $form_state['values']['dd_flexible_style_bg_classes'] = $classes;
+
+}
