@@ -6,89 +6,67 @@
 (function ($, Drupal, window, document, undefined) {
 
   Drupal.behaviors.valign = {
+
+    debounce: false,
+
     attach: function (context, settings) {
-      $('.dd-valign').each(function () {
-        var $this = $(this);
-
-        $this.flexVerticalAlign({
-          cssAttribute: 'margin-top',
-          parentSelector: '.dd-column, .dd-row',
-        });
-      });
+      Drupal.behaviors.valign.verticalAlign();
     },
-  };
 
-  $.fn.flexVerticalAlign = function (options) {
-    var settings = $.extend({
-      cssAttribute: 'margin-top', // the attribute to apply the calculated value to
-      verticalOffset: 0,            // the number of pixels to offset the vertical alignment by
-      parentSelector: null,         // a selector representing the parent to vertically center this element within
-      debounceTimeout: 25,          // a default debounce timeout in milliseconds
-      deferTilWindowLoad: false,     // if true, nothing will take effect until the $(window).load event
-    }, options || {});
+    verticalAlign: function () {
+      // First clear the margins from all elements so that doesn't affect the
+      // calculations.
+      $('.dd-valign').css('margin-top', '').each(function () {
+        var parentSelector = '.dd-column, .dd-row',
+          $this = $(this),
+          media_query = $this.data('valign-mq').split(' '),
+          directions = $this.data('valign-position').split(' '),
+          direction = 'none';
 
-    return this.each(function () {
-      var $this = $(this); // store the object
-      var debounce;
-      // recalculate the distance to the top of the element to keep it centered
-      var resizer = function () {
-        var parentHeight = (settings.parentSelector && $this.parents(settings.parentSelector).length) ?
-          $this.parents(settings.parentSelector).first().height() : $this.parent().height();
-
-        var media_query = $this.data('valign-mq').split(' '),
-          directions = $this.data('valign-position').split(' ');
-        settings.direction = $this.data('valign-position');
+        // Recalculate the distance to the top of the element to keep it centered
+        var parentHeight = (parentSelector && $this.parents(parentSelector).length) ?
+          $this.parents(parentSelector).first().height() : $this.parent().height();
 
         if (media_query) {
           $.each(media_query, function (i, mq) {
-            // Compatibitly fix for Foundation 5.
+            // Compatibility fix for Foundation 5.
             if (Foundation.version.charAt(0) == 5) {
               mq = 'is_' + mq.replace(/-/g, '_') + '_up';
               if (Foundation.utils[mq]()) {
-                settings.direction = directions[i];
+                direction = directions[i];
               }
             }
             else {
               mq = mq.replace(/-/g, '_');
               if (Foundation.MediaQuery.atLeast(mq)) {
-                settings.direction = directions[i];
+                direction = directions[i];
               }
             }
           });
         }
 
-        if (settings.direction == 'bottom') {
-          $this.css(settings.cssAttribute, ( parentHeight - $this.height() ));
+        if (direction == 'bottom') {
+          $this.css('margin-top', ( parentHeight - $this.height() ));
         }
-        else if (settings.direction == 'center') {
-          $this.css(settings.cssAttribute, ( ( ( parentHeight - $this.height() ) / 2 ) + parseInt(settings.verticalOffset) ));
+        else if (direction == 'center') {
+          $this.css('margin-top', ( ( ( parentHeight - $this.height() ) / 2 )));
         }
-        else if (settings.direction == 'top') {
-          $this.css(settings.cssAttribute, 0);
+        else if (direction == 'top') {
+          $this.css('margin-top', 0);
         }
-        if (settings.complete !== undefined) {
-          settings.complete();
-        }
-      };
 
-      // Call on resize. Opera debounces their resize by default.
-      $(window).resize(function () {
-        clearTimeout(debounce);
-        debounce = setTimeout(resizer, settings.debounceTimeout);
       });
-
-      if (!settings.deferTilWindowLoad) {
-        // call it once, immediately.
-        resizer();
-      }
-
-      // Call again to set after window (frames, images, etc) loads.
-      $(window).load(function () {
-        resizer();
-      });
-
-    });
-
+    }
   };
+
+  // Call on resize. Opera debounces their resize by default.
+  $(window).resize(function () {
+    clearTimeout(Drupal.behaviors.valign.debounce);
+    Drupal.behaviors.valign.debounce = setTimeout(Drupal.behaviors.valign.verticalAlign, 25);
+  });
+
+  $(window).load(function () {
+    Drupal.behaviors.valign.verticalAlign();
+  });
 
 })(jQuery, Drupal, this, this.document);
