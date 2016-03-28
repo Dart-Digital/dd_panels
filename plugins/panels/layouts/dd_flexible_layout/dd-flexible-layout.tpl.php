@@ -5,14 +5,14 @@
  */
 ?>
   <?php foreach ($regions as $id => $row): ?>
-    <?php if (!empty($row['columns'])): ?>
+    <?php if (!$row['empty']): ?>
       <?php print $row['prefix']; ?>
       <div<?php print drupal_attributes($row['attributes']); ?>>
         <?php print $row['inner_prefix']; ?>
         <?php print $row['content']; ?>
         <div class="row">
           <?php foreach($row['columns'] as $key => $column): ?>
-            <?php if (!empty($column['content'])): ?>
+            <?php if (!$column['empty']): ?>
               <?php print $column['prefix']; ?>
               <div<?php print drupal_attributes($column['attributes']); ?>>
                 <?php print $column['inner_prefix']; ?>

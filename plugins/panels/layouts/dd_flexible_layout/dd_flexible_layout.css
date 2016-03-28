@@ -7,7 +7,6 @@
   display: block;
 }
 
-
 .panels-ipe-editing .dd-flexible-layout {
   margin-left: auto;
   margin-right: auto;
@@ -28,7 +27,12 @@
   border: 1px dashed #ffff00;
 }
 
-.panels-ipe-editing .no-content {
+.no-content {
+  display: none;
+}
+
+.panels-ipe-editing .no-content,
+#panelizer-edit-content-form .no-content {
   display: block;
 }
 

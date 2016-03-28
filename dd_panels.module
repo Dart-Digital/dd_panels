@@ -162,10 +162,16 @@ function dd_panels_preprocess_dd_flexible_layout(&$variables) {
   unset($variables['content']['popup_3']);
 
   $regions = array();
+  $display = $variables['display'];
   $panel_settings = $variables['display']->panel_settings;
+
+  $is_admin = $variables['renderer']->admin || $variables['renderer']->plugin['renderer'] == 'panels_renderer_ipe';
+  $variables['is_admin'] = $is_admin;
+
   foreach ($variables['content'] as $key => $region) {
     $details = dd_panels_get_region_type($key);
     $row = 'row-' . $details['row'];
+
     // Initialise the attributes string in case we don't get any settings.
     $attributes = array();
 
@@ -176,47 +182,55 @@ function dd_panels_preprocess_dd_flexible_layout(&$variables) {
       'suffix' => '',
     );
 
+    // Get a list of all the regions 'inside' this one. That way we can add a
+    // class if they are all empty so we can hide them for admins until needed.
+    $child_regions = dd_panels_get_child_regions($key);
+
+    $empty = TRUE;
+
+    foreach ($child_regions as $child_region) {
+      if (!empty($display->panels[$child_region])) {
+        $empty = FALSE;
+      }
+    }
+
     if (isset($panel_settings[$key]['style']) && $panel_settings[$key]['style'] == 'dd_flexible_style') {
 
       $style_settings = $panel_settings['style_settings'][$key];
 
-      $display = $variables['display'];
-
       $attributes = dd_flexible_style_attributes($style_settings, $details['type'], $key, $display);
       $wrappers = dd_flexible_style_wrappers($style_settings, $details['type'], $key, $display);
 
-      if (empty($style_settings['force_show'])) {
-
-        // Get a list of all the regions 'inside' this one. That way we can add a
-        // class if they are all empty so we can hide them for admins until needed.
-        $child_regions = dd_panels_get_child_regions($key);
-
-        $empty = TRUE;
-        foreach ($child_regions as $child_region) {
-          if (!empty($display->renderer_handler->prepared['regions'][$child_region]['pids'])) {
-            $empty = FALSE;
-          }
-        }
-
-        if ($empty) {
-          $attributes['class'] .= ' no-content';
-        }
+      // If they've chosen to force this region to show, set $empty to FALSE.
+      if (!empty($style_settings['force_show'])) {
+        $empty = FALSE;
       }
-
     }
+
+    if ($is_admin && $empty) {
+      // If this is an admin render, and there is no content for this region,
+      // wrap it in a class which we will hide until they are in edit mode.
+      $wrappers['prefix'] = '<div class="no-content">' . $wrappers['prefix'];
+      $wrappers['suffix'] = $wrappers['suffix'] . '</div>';
+      $empty = FALSE;
+    }
+
     if ($details['type'] == 'row') {
+      $regions[$row]['empty'] = $empty;
       $regions[$row]['content'] = $region;
       unset($variables['content'][$key]);
       $regions[$row]['attributes'] = $attributes;
       $regions[$row] = array_merge($regions[$row], $wrappers);
     }
     else if ($details['type'] == 'column') {
+      $regions[$row]['columns'][$key]['empty'] = $empty;
       $regions[$row]['columns'][$key]['content'] = $region;
       $regions[$row]['columns'][$key]['attributes'] = $attributes;
       $regions[$row]['columns'][$key] = array_merge($regions[$row]['columns'][$key], $wrappers);
       unset($variables['content'][$key]);
     }
   }
+
   $variables['regions'] = $regions;
 }
 
