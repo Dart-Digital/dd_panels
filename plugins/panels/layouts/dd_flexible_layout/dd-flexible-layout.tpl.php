@@ -36,7 +36,9 @@
     <div class="popup-inner row">
       <?php print $popup; ?>
     </div>
-    <a class="close-reveal-modal">&#215;</a>
+    <button class="close-button" data-close aria-label="Close modal" type="button">
+      <span aria-hidden="true">&#215;</span>
+    </button>
   </div>
   <?php endif; ?>
 
@@ -47,7 +49,9 @@
         <?php print $popup_2; ?>
       </div>
     </div>
-    <a class="close-reveal-modal">&#215;</a>
+    <button class="close-button" data-close aria-label="Close modal" type="button">
+      <span aria-hidden="true">&#215;</span>
+    </button>
   </div>
   <?php endif; ?>
 
@@ -58,6 +62,8 @@
         <?php print $popup_3; ?>
       </div>
     </div>
-    <a class="close-reveal-modal">&#215;</a>
+    <button class="close-button" data-close aria-label="Close modal" type="button">
+      <span aria-hidden="true">&#215;</span>
+    </button>
   </div>
   <?php endif; ?>
