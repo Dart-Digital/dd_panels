@@ -23,9 +23,9 @@ function dd_flexible_style_grid_dd_flexible_style_settings_form_alter(&$form, &$
 
   $first = TRUE;
 
-  if ($type == 'column' || $type == 'pane') {
+  foreach ($breakpoints as $size => $label) {
 
-    foreach ($breakpoints as $size => $label) {
+    if ($type == 'column' || $type == 'pane') {
 
       $form['breakpoints'][$size]['columns_num'] = array(
         '#type' => 'select',
@@ -59,15 +59,16 @@ function dd_flexible_style_grid_dd_flexible_style_settings_form_alter(&$form, &$
         '#default_value' => $style_settings[$size]['columns_offset'],
       );
 
-      $form['breakpoints'][$size]['hide'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Hide'),
-        '#default_value' => $style_settings[$size]['hide'],
-      );
-
-      $first = FALSE;
-
     }
+
+    $form['breakpoints'][$size]['hide'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Hide'),
+      '#default_value' => $style_settings[$size]['hide'],
+    );
+
+    $first = FALSE;
+
   }
 }
 
@@ -78,13 +79,6 @@ function dd_flexible_style_grid_dd_flexible_style_attributes_alter(&$attributes,
   $type = $info['type'];
 
   $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
-
-  // Get the largest breakpoint. It's used for hiding elements on the largest
-  // and above. We assume that the last element in the array is the largest.
-  end($breakpoints);
-  $largest = key($breakpoints);
-  // Now we reset the breakpoints array to the beginning.
-  reset($breakpoints);
 
   if ($type == 'row') {
     if (!empty($settings['full_width'])) {
@@ -107,14 +101,16 @@ function dd_flexible_style_grid_dd_flexible_style_attributes_alter(&$attributes,
       if (isset($settings[$size]['columns_offset']) && is_numeric($settings[$size]['columns_offset'])) {
         $attributes['class'][] = $size . '-offset-' . $settings[$size]['columns_offset'];
       }
+    }
+  }
 
-      if (!empty($settings[$size]['hide'])) {
-        if ($size != $largest) {
-          $attributes['class'][] = "hide-for-$size-only";
-        }
-        else {
-          $attributes['class'][] = "hide-for-$size-up";
-        }
+  foreach ($breakpoints as $size => $breakpoint) {
+    if (!empty($settings[$size]['hide'])) {
+      if (empty($breakpoint['up'])) {
+        $attributes['class'][] = "hide-for-$size";
+      }
+      else {
+        $attributes['class'][] = "hide-for-$size-up";
       }
     }
   }

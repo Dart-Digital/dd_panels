@@ -287,7 +287,7 @@ function dd_panels_dd_flexible_style_default_settings($type) {
 }
 
 function dd_panels_dd_flexible_style_get_breakpoints() {
-  return array(
+  $breakpoints = array(
     'small' => array(
       'label' => t('Small'),
       'min-width' => 0,
@@ -302,8 +302,13 @@ function dd_panels_dd_flexible_style_get_breakpoints() {
       'label' => t('Large'),
       'min-width' => 1025,
       'max-width' => 1440,
+      // If this applies to this breakpoint and '-up'.
+      'up' => TRUE,
     ),
   );
+  drupal_alter('dd_panels_dd_flexible_style_breakpoints', $breakpoints);
+
+  return $breakpoints;
 }
 
 /**
@@ -434,9 +439,8 @@ function theme_dd_panels_dd_flexible_style_breakpoints_table($variables) {
   );
 
   $rows = array();
-  foreach ($breakpoints as $size => $label) {
-    $header[$size] = $label;
-
+  foreach ($breakpoints as $size => $settings) {
+    $header[$size] = $settings['label'];
     foreach (element_children($element[$size]) as $field) {
       $rows[$field]['title'] = $element[$size][$field]['#title'];
       unset($element[$size][$field]['#title']);
