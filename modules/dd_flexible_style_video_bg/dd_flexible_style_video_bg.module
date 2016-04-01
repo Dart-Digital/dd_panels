@@ -1,0 +1,106 @@
+<?php
+
+/**
+ * Implements hook_dd_flexible_style_settings_form_alter().
+ */
+function dd_flexible_style_video_bg_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+  $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
+
+  if ($type == 'row') {
+    foreach ($breakpoints as $size => $breakpoint) {
+      $form['breakpoints'][$size]['video_bg_mp4'] = array(
+        '#type' => 'media',
+        '#tree' => TRUE, // Required
+        '#title' => t('Background Video MP4'),
+        '#description' => t('<strong>Guideline:</strong> 1280x720. Lowest bitrate possible. Remove audio track.'),
+        '#media_options' => array(
+          'global' => array(
+            'file_extensions' => 'mp4 mov', // File extensions
+            'max_filesize' => '20 MB',
+            'file_directory' => 'video', // Will be a subdirectory of the files directory
+            'types' => array('video'), // Refers to a file_entity bundle (such as audio, video, image, etc.)
+          ),
+        ),
+        '#required' => FALSE,
+      );
+
+      if (!empty($style_settings[$size]['video_bg_mp4'])) {
+        $form['breakpoints'][$size]['video_bg_mp4']['#default_value'] = $style_settings[$size]['video_bg_mp4'];
+      }
+
+      $form['breakpoints'][$size]['video_bg_webm'] = array(
+        '#type' => 'media',
+        '#tree' => TRUE, // Required
+        '#title' => t('Background Video WebM'),
+        '#description' => t('<strong>Guideline:</strong> 1280x720. Lowest bitrate possible. Remove audio track.'),
+        '#media_options' => array(
+          'global' => array(
+            'file_extensions' => 'webm', // File extensions
+            'max_filesize' => '20 MB',
+            'file_directory' => 'video', // Will be a subdirectory of the files directory
+            'types' => array('video'), // Refers to a file_entity bundle (such as audio, video, image, etc.)
+          ),
+        ),
+        '#required' => FALSE,
+      );
+
+      if (!empty($style_settings[$size]['video_bg_webm'])) {
+        $form['breakpoints'][$size]['video_bg_webm']['#default_value'] = $style_settings[$size]['video_bg_webm'];
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_dd_flexible_style_attributes_alter().
+ */
+function dd_flexible_style_video_bg_dd_flexible_style_attributes_alter(&$attributes, $settings, $info) {
+  // This should only apply to rows.
+  if ($info['type'] != 'row') {
+    return;
+  }
+
+  // Don't apply styles on admin.
+  if (path_is_admin(current_path())) {
+    return;
+  }
+
+  $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
+
+  $videos = array();
+
+  foreach ($breakpoints as $size => $breakpoint) {
+
+    // The reason we do this in two steps is that, like most other settings
+    // for different breakpoints, we assume they apply to all larger sizes
+    // unless specific settings have been set for those. For example if a
+    // bg image is set for small only, it will apply to small, medium, and
+    // large. If it's set for small and large, then the small version will
+    // apply for small and medium, and the large version will appear for
+    // large.
+    if (!empty($settings[$size]['video_bg_webm'])) {
+      $webm_file = file_load($settings[$size]['video_bg_webm']);
+    }
+
+    if (!empty($settings[$size]['video_bg_mp4'])) {
+      $mp4_file = file_load($settings[$size]['video_bg_mp4']);
+    }
+
+    if (isset($webm_file)) {
+      $videos[$size]['webm'] = file_create_url($webm_file->uri);
+    }
+
+    if (isset($mp4_file)) {
+      $videos[$size]['mp4'] = file_create_url($mp4_file->uri);
+    }
+  }
+
+  if (!empty($videos)) {
+    $attributes['data-video-bg'] = json_encode($videos);
+    $attributes['class'][] = 'dd_flexible_style_video_bg';
+    drupal_add_js(drupal_get_path('module', 'dd_flexible_style_video_bg') . '/js/dd_flexible_style_video_bg.js');
+    drupal_add_css(drupal_get_path('module', 'dd_flexible_style_video_bg') . '/css/dd_flexible_style_video_bg.css');
+    $attributes['data-region-id'] = $info['region_id'];
+  }
+
+}
