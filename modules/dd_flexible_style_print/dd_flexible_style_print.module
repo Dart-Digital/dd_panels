@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * Implements hook_dd_flexible_style_settings_form_alter().
+ */
+function dd_flexible_style_print_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+  $form['print_page_break_before'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Force Page Break before this element'),
+    '#default_value' => (isset($style_settings['print_page_break_before'])) ? $style_settings['print_page_break_before'] : 0,
+  );
+
+  $form['print_page_break_after'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Force Page Break after this element'),
+    '#default_value' => (isset($style_settings['print_page_break_after'])) ? $style_settings['print_page_break_after'] : 0,
+  );
+}
+
+/**
+ * Implements hook_dd_flexible_style_attributes_alter().
+ */
+function dd_flexible_style_print_dd_flexible_style_attributes_alter(&$attributes, $settings, $info) {
+  if (!empty($settings['print_page_break_before'])) {
+    $attributes['class'][] = 'page-break-before';
+  }
+  elseif (!empty($settings['print_page_break_after'])) {
+    $attributes['class'][] = 'page-break-after';
+  }
+}
+
+/**
+ * Implements hook_dd_panels_dd_flexible_style_breakpoints_alter().
+ */
+function dd_flexible_style_print_dd_panels_dd_flexible_style_breakpoints_alter(&$breakpoints) {
+  $breakpoints['print'] = array(
+    'label' => t('Print'),
+    'min-width' => 0,
+    'max-width' => 1440,
+  );
+}
