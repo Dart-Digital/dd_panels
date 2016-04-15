@@ -152,16 +152,30 @@ function dd_panels_preprocess_dd_flexible_layout(&$variables) {
 
   $plugin_path = drupal_get_path('module', 'dd_panels') . '/plugins/panels/layouts/dd_flexible_layout/';
 
+  $display = $variables['display'];
+  $panel_settings = $display->panel_settings;
+
   $num_popups = variable_get('dd_flexible_layout_num_popups', 3);
   $popup_settings = [
     'popup' => 'popup_1',
   ];
 
   for ($i = 1; $i <= $num_popups; $i++) {
-    if (!empty($variables['content']['popup_' . $i])) {
-      $variables['popups']['popup_' . $i] = $variables['content']['popup_' . $i];
-      unset($variables['content']['popup_' . $i]);
-      $popup_settings['popup-' . $i] = 'popup_' . $i;
+    $key = 'popup_' . $i;
+    if (!empty($variables['content'][$key])) {
+      $variables['popups'][$key]['content'] = $variables['content'][$key];
+      unset($variables['content'][$key]);
+      $popup_settings['popup-' . $i] = $key;
+
+      $attributes = [];
+
+      if (isset($panel_settings[$key]['style']) && $panel_settings[$key]['style'] == 'dd_flexible_style') {
+        $style_settings = $panel_settings['style_settings'][$key];
+        $attributes = dd_flexible_style_attributes($style_settings, 'popup', $key, $display);
+        unset($attributes['id']);
+      }
+
+      $variables['popups'][$key]['attributes'] = $attributes;
     }
   }
 
@@ -171,8 +185,6 @@ function dd_panels_preprocess_dd_flexible_layout(&$variables) {
   }
 
   $regions = array();
-  $display = $variables['display'];
-  $panel_settings = $variables['display']->panel_settings;
 
   $is_admin = $variables['renderer']->admin || $variables['renderer']->plugin['renderer'] == 'panels_renderer_ipe';
   $variables['is_admin'] = $is_admin;

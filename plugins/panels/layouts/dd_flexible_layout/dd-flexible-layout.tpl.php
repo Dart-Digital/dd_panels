@@ -36,7 +36,9 @@
       <?php if (!empty($popup)): ?>
       <div id="<?php print $id; ?>" class="popup-wrapper reveal" data-reveal aria-hidden="true" role="dialog">
         <div class="popup-inner row">
-          <?php print $popup; ?>
+          <div<?php print drupal_attributes($popup['attributes']); ?>>
+            <?php print $popup['content']; ?>
+          </div>
         </div>
         <a class="close-reveal-modal">&#215;</a>
       </div>
