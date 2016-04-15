@@ -175,6 +175,9 @@ function dd_panels_preprocess_dd_flexible_layout(&$variables) {
         unset($attributes['id']);
       }
 
+      $attributes['class'] .= ' small-' . variable_get('dd_flexible_style_num_columns', 12);
+      $attributes['class'] .= ' columns';
+
       $variables['popups'][$key]['attributes'] = $attributes;
     }
   }
