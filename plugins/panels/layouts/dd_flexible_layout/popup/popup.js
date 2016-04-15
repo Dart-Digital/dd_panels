@@ -6,16 +6,9 @@
 (function ($, Drupal, window, document, undefined) {
 
   Drupal.behaviors.dd_flexible_layout_popup = {
-    popups: {
-      "popup": "popup_1",
-      "popup-1": "popup_1",
-      "popup-2": "popup_2",
-      "popup-3": "popup_3"
-    },
-
     attach: function(context, settings) {
 
-      var popups = Drupal.behaviors.dd_flexible_layout_popup.popups;
+      var popups = Drupal.settings.dd_flexible_layout_popup;
       $('.popup-wrapper').once('dd-popup').hide();
 
       for(var key in popups) {
@@ -38,7 +31,7 @@
     },
 
     isOurPopup: function(modal) {
-      var popups = Drupal.behaviors.dd_flexible_layout_popup.popups,
+      var popups = Drupal.settings.dd_flexible_layout_popup;
         id = modal.attr('id');
 
       for(var key in popups) {

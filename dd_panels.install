@@ -1,1 +1,86 @@
 <?php
+
+/**
+ * Fix incorrectly unserialized displays.
+ *
+ * This fixes issues with panels displays that were updated in previous updates
+ * but didn't have all their properties unserialized properly.
+ */
+function dd_panels_update_7000() {
+  $displays = db_select('panels_display')
+    ->fields('panels_display')
+    ->condition('layout', 'dd_flexible_layout')
+    ->execute();
+
+  foreach ($displays as $display) {
+    $display = current(panels_load_displays(array($display->did)));
+    $display->cache = dd_panels_recursive_unserialize($display->cache);
+    $display->content = dd_panels_recursive_unserialize($display->content);
+    $display->panels = dd_panels_recursive_unserialize($display->panels);
+    $display->layout_settings = dd_panels_recursive_unserialize($display->layout_settings);
+    $display->panel_settings = dd_panels_recursive_unserialize($display->panel_settings);
+    panels_save_display($display);
+  }
+}
+
+/**
+ * Update Popup 1 region machine name.
+ */
+function dd_panels_update_7001() {
+  // Update row styles.
+  $displays = db_select('panels_display')
+    ->fields('panels_display')
+    ->condition('layout', 'dd_flexible_layout')
+    ->execute();
+
+  foreach ($displays as $display) {
+    $display = current(panels_load_displays(array($display->did)));
+
+    $update = FALSE;
+
+    if (!empty($display->panels['popup'])) {
+      $update = TRUE;
+      $display->panels['popup_1'] = $display->panels['popup'];
+      unset($display->panels['popup']);
+      foreach ($display->panels['popup_1'] as $pid) {
+        $display->content[$pid]->panel = 'popup_1';
+      }
+    }
+
+    if (!empty($display->panel_settings['style_settings']['popup'])) {
+      $update = TRUE;
+      $display->panel_settings['style_settings']['popup_1'] = $display->panel_settings['style_settings']['popup'];
+      unset($display->panel_settings['style_settings']['popup']);
+    }
+
+    if (!empty($display->panel_settings['popup'])) {
+      $update = TRUE;
+      $display->panel_settings['popup_1'] = $display->panel_settings['popup'];
+      unset($display->panel_settings['popup']);
+    }
+
+    if ($update) {
+      panels_save_display($display);
+    }
+  }
+}
+
+/**
+ * Recursively unserialize a string.
+ *
+ * In recent update hooks we didn't unserialize all the properties properly,
+ * and when they were resaved they were serialized again. This function will
+ * continue to unserialize the provided string until it can't be unserialized
+ * again, and it will return the true value.
+ *
+ * @param $string
+ * @return mixed
+ */
+function dd_panels_recursive_unserialize($string) {
+  $unserialized = @unserialize($string);
+  if ($unserialized === false) {
+    return $string;
+  }
+  return recursive_unserialize($unserialized);
+}
+

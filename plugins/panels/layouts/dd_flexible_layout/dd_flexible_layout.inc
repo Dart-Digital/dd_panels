@@ -29,16 +29,18 @@ $plugin = array(
 function dd_flexible_layout_generate_regions() {
   $regions = array();
 
-  $num_rows = variable_get('dd_flexible_layout_num_columns', 12);
+  $num_rows = variable_get('dd_flexible_layout_num_rows', 12);
 
   for ($i = 1; $i <= $num_rows; $i++) {
     $regions["row-$i"] = t('Row !num', array('!num' => $i));
     $regions += dd_flexible_layout_generate_sub_regions($i);
   }
 
-  $regions['popup'] = t('Popup 1');
-  $regions['popup_2'] = t('Popup 2');
-  $regions['popup_3'] = t('Popup 3');
+  $num_popups = variable_get('dd_flexible_layout_num_popups', 3);
+
+  for ($i = 1; $i <= $num_popups; $i++) {
+    $regions['popup_' . $i] = t('Popup !num', array('!num' => $i));
+  }
 
   return $regions;
 }

@@ -31,39 +31,15 @@
     <?php endif; ?>
   <?php endforeach; ?>
 
-  <?php if (!empty($popup)): ?>
-  <div id="popup_1" class="popup-wrapper reveal" data-reveal aria-hidden="true" role="dialog">
-    <div class="popup-inner row">
-      <?php print $popup; ?>
-    </div>
-    <button class="close-button" data-close aria-label="Close modal" type="button">
-      <span aria-hidden="true">&#215;</span>
-    </button>
-  </div>
-  <?php endif; ?>
-
-  <?php if (!empty($popup_2)): ?>
-  <div id="popup_2" class="popup-wrapper reveal" data-reveal aria-hidden="true" role="dialog">
-    <div class="popup-inner row">
-      <div class="popup-content">
-        <?php print $popup_2; ?>
+  <?php if (!empty($popups)): ?>
+    <?php foreach ($popups as $id => $popup): ?>
+      <?php if (!empty($popup)): ?>
+      <div id="<?php print $id; ?>" class="popup-wrapper reveal" data-reveal aria-hidden="true" role="dialog">
+        <div class="popup-inner row">
+          <?php print $popup; ?>
+        </div>
+        <a class="close-reveal-modal">&#215;</a>
       </div>
-    </div>
-    <button class="close-button" data-close aria-label="Close modal" type="button">
-      <span aria-hidden="true">&#215;</span>
-    </button>
-  </div>
-  <?php endif; ?>
-
-  <?php if (!empty($popup_3)): ?>
-  <div id="popup_3" class="popup-wrapper reveal" data-reveal aria-hidden="true" role="dialog">
-    <div class="popup-inner row">
-      <div class="popup-content">
-        <?php print $popup_3; ?>
-      </div>
-    </div>
-    <button class="close-button" data-close aria-label="Close modal" type="button">
-      <span aria-hidden="true">&#215;</span>
-    </button>
-  </div>
+      <?php endif; ?>
+    <?php endforeach; ?>
   <?php endif; ?>

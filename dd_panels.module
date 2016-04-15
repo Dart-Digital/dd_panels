@@ -21,13 +21,13 @@ function dd_panels_ctools_plugin_directory($owner, $plugin_type) {
 function dd_panels_menu() {
   $items = array();
 
-  $items['admin/config/content/dd_flexible_styles'] = array(
-    'title' => 'DD Flexible Styles settings',
-    'description' => 'Configure the DD Panels styles settings',
+  $items['admin/config/content/dd_panels'] = array(
+    'title' => 'DD Panels settings',
+    'description' => 'Configure the DD Panels settings',
     'access callback' => 'user_access',
     'access arguments' => array('administer dd_panels'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('dd_panels_dd_flexible_style_settings_form'),
+    'page arguments' => array('dd_panels_settings_form'),
     'file' => 'dd_panels.admin.inc',
     'type' => MENU_NORMAL_ITEM,
   );
@@ -152,14 +152,23 @@ function dd_panels_preprocess_dd_flexible_layout(&$variables) {
 
   $plugin_path = drupal_get_path('module', 'dd_panels') . '/plugins/panels/layouts/dd_flexible_layout/';
 
-  drupal_add_js($plugin_path . 'popup/popup.js');
+  $num_popups = variable_get('dd_flexible_layout_num_popups', 3);
+  $popup_settings = [
+    'popup' => 'popup_1',
+  ];
 
-  $variables['popup'] = $variables['content']['popup'];
-  $variables['popup_2'] = $variables['content']['popup_2'];
-  $variables['popup_3'] = $variables['content']['popup_3'];
-  unset($variables['content']['popup']);
-  unset($variables['content']['popup_2']);
-  unset($variables['content']['popup_3']);
+  for ($i = 1; $i <= $num_popups; $i++) {
+    if (!empty($variables['content']['popup_' . $i])) {
+      $variables['popups']['popup_' . $i] = $variables['content']['popup_' . $i];
+      unset($variables['content']['popup_' . $i]);
+      $popup_settings['popup-' . $i] = 'popup_' . $i;
+    }
+  }
+
+  if (!empty($variables['popups'])) {
+    drupal_add_js(array('dd_flexible_layout_popup' => $popup_settings), 'setting');
+    drupal_add_js($plugin_path . 'popup/popup.js');
+  }
 
   $regions = array();
   $display = $variables['display'];

@@ -148,9 +148,9 @@ function dd_flexible_style_bg_dd_flexible_style_default_settings_alter(&$setting
 }
 
 /**
- * Implements hook_dd_panels_dd_flexible_style_settings_form_alter();
+ * Implements hook_dd_panels_settings_form_alter();
  */
-function dd_flexible_style_bg_dd_panels_dd_flexible_style_settings_form_alter(&$form, &$form_state) {
+function dd_flexible_style_bg_dd_panels_settings_form_alter(&$form, &$form_state) {
   $classes = variable_get('dd_flexible_style_bg_classes', array());
   $classes_string = '';
   foreach ($classes as $key => $value) {
@@ -166,16 +166,16 @@ function dd_flexible_style_bg_dd_panels_dd_flexible_style_settings_form_alter(&$
 }
 
 /**
- * Implements hook_dd_panels_dd_flexible_style_settings_form_validate_alter();
+ * Implements hook_dd_panels_settings_form_validate_alter();
  */
-function dd_flexible_style_bg_dd_panels_dd_flexible_style_settings_form_validate_alter(&$form_id, &$form_values) {
+function dd_flexible_style_bg_dd_panels_settings_form_validate_alter(&$form_id, &$form_values) {
 
 }
 
 /**
- * Implements hook_dd_panels_dd_flexible_style_settings_form_submit_alter();
+ * Implements hook_dd_panels_settings_form_submit_alter();
  */
-function dd_flexible_style_bg_dd_panels_dd_flexible_style_settings_form_submit_alter($form, &$form_state) {
+function dd_flexible_style_bg_dd_panels_settings_form_submit_alter($form, &$form_state) {
 
   $classes = array();
   $dd_flexible_style_bg_classes = $form_state['values']['dd_flexible_style_bg_classes'];
