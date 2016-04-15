@@ -297,6 +297,11 @@ function dd_panels_get_region_type($region_id) {
     $details['type'] = 'row';
     $details['row'] = $matches[1];
   }
+  elseif (strpos($region_id, 'popup') !== FALSE) {
+    preg_match('/(?:popup_([0-9]+))?/', $region_id, $matches);
+    $details['type'] = 'popup';
+    $details['row'] = $matches[1];
+  }
   else {
     $details['type'] = 'unknown';
     $details['row'] = FALSE;
