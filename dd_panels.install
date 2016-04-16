@@ -81,6 +81,6 @@ function dd_panels_recursive_unserialize($string) {
   if ($unserialized === false) {
     return $string;
   }
-  return recursive_unserialize($unserialized);
+  return dd_panels_recursive_unserialize($unserialized);
 }
 
