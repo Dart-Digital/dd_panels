@@ -26,7 +26,7 @@ function dd_panels_settings_form($form, &$form_state) {
 
   $form['dd_flexible_layout_num_popups'] = array(
     '#type' => 'textfield',
-    '#title' => t('Number of rows'),
+    '#title' => t('Number of popups'),
     '#description' => t('The number of popups for each page. Increase this if you run out of available popups.'),
     '#default_value' => variable_get('dd_flexible_layout_num_popups', 3),
   );
