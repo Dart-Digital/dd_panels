@@ -226,7 +226,11 @@ function dd_panels_preprocess_dd_flexible_layout(&$variables) {
       }
     }
 
-    if (isset($panel_settings[$key]['style']) && $panel_settings[$key]['style'] == 'dd_flexible_style') {
+    if (
+      isset($panel_settings[$key]['style'])
+      && $panel_settings[$key]['style'] == 'dd_flexible_style'
+      && isset($panel_settings['style_settings'][$key])
+    ) {
 
       $style_settings = $panel_settings['style_settings'][$key];
 
