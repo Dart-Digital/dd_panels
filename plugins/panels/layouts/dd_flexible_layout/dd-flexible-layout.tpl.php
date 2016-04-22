@@ -42,7 +42,9 @@
             </div>
           </div>
         </div>
-        <a class="close-reveal-modal">&#215;</a>
+        <button class="close-button" data-close aria-label="Close modal" type="button">
+          <span aria-hidden="true">&#215;</span>
+        </button>
       </div>
       <?php endif; ?>
     <?php endforeach; ?>
