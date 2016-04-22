@@ -13,7 +13,10 @@
 
       for(var key in popups) {
         $('.' + key).once('popup').each(function() {
-          $(this).attr('data-open', popups[key]);
+          // Prevent popup from triggering if there is nothing to open.
+          if ($('#' + popups[key]).length) {
+            $(this).attr('data-reveal-id', popups[key]);
+          }
         });
       }
 

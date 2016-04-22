@@ -162,10 +162,10 @@ function dd_panels_preprocess_dd_flexible_layout(&$variables) {
 
   for ($i = 1; $i <= $num_popups; $i++) {
     $key = 'popup_' . $i;
+    $popup_settings['popup-' . $i] = $key;
     if (!empty($variables['content'][$key])) {
       $variables['popups'][$key]['content'] = $variables['content'][$key];
       unset($variables['content'][$key]);
-      $popup_settings['popup-' . $i] = $key;
 
       $attributes = [];
 
