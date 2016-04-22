@@ -36,7 +36,8 @@
   display: block;
 }
 
-.panels-ipe-editing .popup-wrapper {
+.panels-ipe-editing .popup-wrapper,
+#panelizer-edit-content-form .popup-wrapper {
   display: block !important;
   position: relative !important;
   z-index: 0 !important;
