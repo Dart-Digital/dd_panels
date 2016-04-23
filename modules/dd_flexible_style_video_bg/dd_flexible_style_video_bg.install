@@ -12,7 +12,7 @@ function dd_flexible_style_video_bg_update_7000() {
   $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
   foreach ($displays as $display) {
     $update = FALSE;
-    $display->panel_settings = unserialize($display->panel_settings);
+    $display = current(panels_load_displays(array($display->did)));
     foreach ($display->panel_settings['style_settings'] as &$settings) {
       if (empty($settings)) {
         continue;
@@ -27,7 +27,7 @@ function dd_flexible_style_video_bg_update_7000() {
     }
 
     if ($update) {
-      drupal_write_record('panels_display', $display, array('did'));
+      panels_save_display($display);
     }
   }
 
@@ -38,7 +38,7 @@ function dd_flexible_style_video_bg_update_7000() {
 
   foreach ($panes as $pane) {
     $update = FALSE;
-    $pane->style = unserialize($pane->style);
+    $pane = ctools_export_unpack_object('panels_pane', $pane);
     foreach ($pane->style as &$settings) {
       if (isset($settings['valign'])) {
         foreach ($breakpoints as $size => $breakpoint) {
