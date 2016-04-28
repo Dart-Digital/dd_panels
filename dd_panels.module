@@ -518,7 +518,7 @@ function dd_panels_panels_ipe_region_links_alter(&$links, $context) {
  * Implements hook_form_alter().
  */
 function dd_panels_form_fieldable_panels_panes_fieldable_panels_pane_content_type_edit_form_alter(&$form, &$form_state, $form_id) {
-  dd_panels_form_fieldable_panels_panes_entity_edit_form_alter($form, $form_state);
+  dd_panels_form_fieldable_panels_panes_entity_edit_form_alter($form, $form_state, $form_id);
 }
 
 /**
