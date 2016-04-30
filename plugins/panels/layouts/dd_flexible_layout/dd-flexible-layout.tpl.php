@@ -4,6 +4,9 @@
  * Template for the DD Flexible Layout panel layout.
  */
 ?>
+<?php print $wrappers['prefix']; ?>
+<div<?php print $attributes; ?>>
+<?php print $wrappers['inner_prefix']; ?>
   <?php foreach ($regions as $id => $row): ?>
     <?php if (!$row['empty']): ?>
       <?php print $row['prefix']; ?>
@@ -49,3 +52,6 @@
       <?php endif; ?>
     <?php endforeach; ?>
   <?php endif; ?>
+<?php print $wrappers['inner_suffix']; ?>
+</div>
+<?php print $wrappers['suffix']; ?>

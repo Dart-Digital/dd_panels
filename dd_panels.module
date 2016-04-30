@@ -155,6 +155,15 @@ function dd_panels_preprocess_dd_flexible_layout(&$variables) {
   $display = $variables['display'];
   $panel_settings = $display->panel_settings;
 
+  $layout_settings = $variables['settings'];
+
+  if (empty($layout_settings)) {
+    $layout_settings = array();
+  }
+
+  $variables['attributes_array'] = dd_flexible_layout_attributes($layout_settings, $display);
+  $variables['wrappers'] = dd_flexible_layout_wrappers($layout_settings, $display);
+
   $num_popups = variable_get('dd_flexible_layout_num_popups', 3);
   $popup_settings = [
     'popup' => 'popup_1',
@@ -351,7 +360,7 @@ function dd_flexible_style_attributes($settings, $type, $region_id, $display) {
 
   $attributes = array();
 
-  $attributes['id'] = $region_id;
+  $attributes['id'] = drupal_html_id($region_id);
 
   $default_settings = dd_panels_dd_flexible_style_default_settings($type);
   $settings = array_replace_recursive($default_settings, $settings);
@@ -415,6 +424,68 @@ function dd_panels_dd_flexible_style_default_settings($type) {
   }
 
   drupal_alter('dd_flexible_style_default_settings', $settings, $type);
+
+  return $settings;
+}
+
+function dd_flexible_layout_attributes($settings, $display) {
+
+  if (empty($settings)) {
+    $settings = array();
+  }
+
+  $attributes = array();
+
+  $attributes['id'] = drupal_html_id('dd-flexible-layout');
+  $attributes['class'] = array('dd-flexible-layout');
+
+  $default_settings = dd_panels_dd_flexible_layout_default_settings();
+  $settings = array_replace_recursive($default_settings, $settings);
+
+  drupal_alter('dd_flexible_layout_attributes', $attributes, $settings, $display);
+
+  if (isset($attributes['styles'])) {
+    $attributes['style'] = implode(' ', $attributes['styles']);
+  }
+
+  if (isset($attributes['class'])) {
+    $attributes['class'] = implode(' ', $attributes['class']);
+  }
+
+  return $attributes;
+}
+
+function dd_flexible_layout_wrappers($settings, $display) {
+
+  if (empty($settings)) {
+    $settings = array();
+  }
+
+  // Initialise wrappers as arrays. This gives some flexibility if they need to
+  // be altered by other modules.
+  $wrappers = array(
+    'prefix_array' => array(),
+    'inner_prefix_array' => array(),
+    'inner_suffix_array' => array(),
+    'suffix_array' => array(),
+  );
+
+  drupal_alter('dd_flexible_layout_wrappers', $wrappers, $settings);
+
+  // Combine each wrapper together. But keep the arrays around just in case.
+  $wrappers['prefix'] = implode('', $wrappers['prefix_array']);
+  $wrappers['inner_prefix'] = implode('', $wrappers['inner_prefix_array']);
+  $wrappers['inner_suffix'] = implode('', $wrappers['inner_suffix_array']);
+  $wrappers['suffix'] = implode('', $wrappers['suffix_array']);
+
+  return $wrappers;
+}
+
+function dd_panels_dd_flexible_layout_default_settings() {
+
+  $settings = array();
+
+  drupal_alter('dd_flexible_layout_default_settings', $settings, $type);
 
   return $settings;
 }

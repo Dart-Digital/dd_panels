@@ -21,9 +21,9 @@ $plugin = array(
 
   'regions'     => dd_flexible_layout_generate_regions(),
 
-//  'settings form'     => 'dd_flexible_layout_settings_form',
-//  'settings validate' => 'dd_flexible_layout_settings_validate',
-//  'settings submit'   => 'dd_flexible_layout_settings_submit',
+  'settings form'     => 'dd_flexible_layout_settings_form',
+  'settings validate' => 'dd_flexible_layout_settings_validate',
+  'settings submit'   => 'dd_flexible_layout_settings_submit',
 );
 
 function dd_flexible_layout_generate_regions() {
@@ -53,4 +53,37 @@ function dd_flexible_layout_generate_sub_regions($row) {
     $regions["row-$row-column-$i"] = t('Row !region, Column !num', array('!region' => $row, '!num' => $i));
   }
   return $regions;
+}
+
+/**
+ * Settings form callback.
+ */
+function dd_flexible_layout_settings_form($display, $layout, $layout_settings) {
+
+  $default_settings = dd_panels_dd_flexible_layout_default_settings();
+  $layout_settings = array_replace_recursive($default_settings, $layout_settings);
+
+  $form = array();
+
+  drupal_alter('dd_flexible_layout_settings_form', $form, $form_state, $layout_settings);
+
+  return $form;
+}
+
+/**
+ * Settings form validate callback.
+ */
+function dd_flexible_layout_settings_validate(&$form, &$form_state) {
+
+  // We should probably allow modules to validate their stuff...
+
+}
+
+/**
+ * Settings form submit callback.
+ */
+function dd_flexible_layout_settings_submit(&$form, &$form_state) {
+
+  // We should probably allow modules to alter the way their stuff is submitted.
+
 }
