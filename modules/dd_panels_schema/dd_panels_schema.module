@@ -1,0 +1,79 @@
+<?php
+
+/**
+ * Implements hook_dd_flexible_layout_settings_form_alter().
+ */
+function dd_panels_schema_dd_flexible_layout_settings_form_alter(&$form, &$form_state, $layout_settings) {
+  dd_panels_schema_settings_form($form, $form_state, $layout_settings);
+}
+
+/**
+ * Implements hook_dd_flexible_style_settings_form_alter().
+ */
+function dd_panels_schema_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+  dd_panels_schema_settings_form($form, $form_state, $style_settings);
+}
+
+/**
+ * Combined settings for layout and style.
+ */
+function dd_panels_schema_settings_form(&$form, &$form_state, $settings) {
+  $form['schema.org'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Schema.org',
+    '#tree' => TRUE,
+  );
+
+  $form['schema.org']['itemtype'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Item type',
+    '#default_value' => $settings['schema.org']['itemtype'],
+    '#description' => t('For example, !types.',
+      array(
+        '!types' => 'http://schema.org/Person',
+      )
+    ),
+  );
+
+  $form['schema.org']['itemprop'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Item property(s)',
+    '#default_value' => $settings['schema.org']['itemprop'],
+    '#description' => t('Comma-separated list. Example: !properties',
+      array(
+        '!properties' => 'name, http://xmlns.com/foaf/0.1/name',
+      )
+    ),
+  );
+}
+
+/**
+ * Implements hook_dd_flexible_layout_attributes_alter().
+ */
+function dd_panels_schema_dd_flexible_layout_attributes_alter(&$attributes, $settings, $info) {
+  dd_panels_schema_attributes($attributes, $settings, $info);
+}
+
+/**
+ * Implements hook_dd_flexible_style_attributes_alter().
+ */
+function dd_panels_schema_dd_flexible_style_attributes_alter(&$attributes, $settings, $info) {
+  dd_panels_schema_attributes($attributes, $settings, $info);
+}
+
+/**
+ * Combined attributes for layout and style.
+ */
+function dd_panels_schema_attributes(&$attributes, $settings, $info) {
+  if (empty($settings['schema.org'])) {
+    return;
+  }
+
+  if (!empty($settings['schema.org']['itemtype'])) {
+    $attributes['itemtype'] = $settings['schema.org']['itemtype'];
+  }
+
+  if (!empty($settings['schema.org']['itemprop'])) {
+    $attributes['itemprop'] = $settings['schema.org']['itemprop'];
+  }
+}
