@@ -70,6 +70,7 @@ function dd_panels_schema_attributes(&$attributes, $settings, $info) {
   }
 
   if (!empty($settings['schema.org']['itemtype'])) {
+    $attributes['itemscope'] = "";
     $attributes['itemtype'] = $settings['schema.org']['itemtype'];
   }
 
