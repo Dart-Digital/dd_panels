@@ -62,9 +62,9 @@ function theme_dd_flexible_style_render_pane($vars) {
 
   $vars['content'] = theme('panels_pane', array('content' => $content, 'pane' => $pane, 'display' => $display));
 
-  $vars['attributes_array'] = dd_flexible_style_attributes($pane->style['settings'], 'pane', $pane->panel . '-pane-1', $display);
+  $vars['attributes_array'] = dd_flexible_style_attributes($pane->style['settings'], 'pane', $pane->panel . '-pane-' . $pane->pid, $display);
 
-  $wrappers = dd_flexible_style_wrappers($pane->style['settings'], 'pane', $pane->panel . '-pane-1', $display);
+  $wrappers = dd_flexible_style_wrappers($pane->style['settings'], 'pane', $pane->panel . '-pane-' . $pane->pid, $display);
 
   $vars = array_merge($vars, $wrappers);
 
@@ -91,9 +91,9 @@ function dd_flexible_style_settings_form_submit(&$form, &$form_state) {
 /**
  * Settings form callback.
  */
-function dd_flexible_style_pane_settings_form($style_settings) {
+function dd_flexible_style_pane_settings_form($style_settings, $display, $pid, $type, $form_state) {
 
-  $form = _dd_flexible_style_settings_form($style_settings);
+  $form = _dd_flexible_style_settings_form($style_settings, $display, $pid, $type, $form_state);
 
   return $form;
 }
@@ -109,10 +109,13 @@ function _dd_flexible_style_settings_form($style_settings, $display, $pid, $type
 
   $display_id = $display->did;
 
-  if ($type == 'region') {
-    $details = dd_panels_get_region_type($pid);
-    $type = $details['type'];
+  if ($type == 'pane') {
+    $pane = $display->content[$pid];
+    $pid = $pane->panel . '-pane-' . $pid;
   }
+
+  $details = dd_panels_get_region_type($pid);
+  $type = $details['type'];
 
   $default_settings = dd_panels_dd_flexible_style_default_settings($type, $details);
   $style_settings = array_replace_recursive($default_settings, $style_settings);
