@@ -3,7 +3,9 @@
 /**
  * Implements hook_dd_flexible_style_settings_form_alter().
  */
-function dd_flexible_style_slider_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+function dd_flexible_style_slider_dd_flexible_style_settings_form_alter(&$form, &$form_state, $details, $style_settings) {
+  $type = $details['type'];
+
   if ($type == 'column') {
     $form['breakpoints']['slider'] = array(
       '#type' => 'checkbox',

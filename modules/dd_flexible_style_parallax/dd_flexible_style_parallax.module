@@ -3,8 +3,10 @@
 /**
  * Implements hook_dd_flexible_style_settings_form_alter().
  */
-function dd_flexible_style_parallax_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
-    if ($type == 'row') {
+function dd_flexible_style_parallax_dd_flexible_style_settings_form_alter(&$form, &$form_state, $details, $style_settings) {
+  $type = $details['type'];
+
+  if ($type == 'row') {
 
       $form['parallax'] = array(
         '#type' => 'checkbox',

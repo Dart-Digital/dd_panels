@@ -74,9 +74,9 @@ function theme_dd_flexible_style_render_pane($vars) {
 /**
  * Settings form callback.
  */
-function dd_flexible_style_region_settings_form($style_settings) {
+function dd_flexible_style_region_settings_form($style_settings, $display, $pid, $type, $form_state) {
 
-  $form = _dd_flexible_style_settings_form($style_settings);
+  $form = _dd_flexible_style_settings_form($style_settings, $display, $pid, $type, $form_state);
 
   return $form;
 }
@@ -105,36 +105,16 @@ function dd_flexible_style_pane_settings_form_submit(&$form, &$form_state) {
   _dd_flexible_style_settings_form_submit($form, $form_state);
 }
 
-function _dd_flexible_style_settings_form($style_settings) {
+function _dd_flexible_style_settings_form($style_settings, $display, $pid, $type, $form_state) {
 
-  if (isset($style_settings['type']) && isset($style_settings['pid']) && isset($style_settings['display_id'])) {
-    $type = $style_settings['type'];
-    $pid = $style_settings['pid'];
-    $display_id = $style_settings['display_id'];
-  }
-  else {
-    // Need to find out the details of the display we're working with.
-    $backtrace = debug_backtrace();
+  $display_id = $display->did;
 
-    // We can't work out what region or pane we're on so we need to bail.
-    if ($backtrace['2']['function'] != 'panels_edit_style_settings_form') {
-      return array();
-    }
-
-    $args = $backtrace['2']['args'][1];
-    $display = $args['display'];
-    $type = $args['type'];
-    $pid = $args['pid'];
-
-    $display_id = $display->did;
-
-    if ($type == 'region') {
-      $details = dd_panels_get_region_type($pid);
-      $type = $details['type'];
-    }
+  if ($type == 'region') {
+    $details = dd_panels_get_region_type($pid);
+    $type = $details['type'];
   }
 
-  $default_settings = dd_panels_dd_flexible_style_default_settings($type);
+  $default_settings = dd_panels_dd_flexible_style_default_settings($type, $details);
   $style_settings = array_replace_recursive($default_settings, $style_settings);
 
   $form = array();
@@ -180,7 +160,7 @@ function _dd_flexible_style_settings_form($style_settings) {
     '#inherit' => $inherit,
   );
 
-  drupal_alter('dd_flexible_style_settings_form', $form, $form_state, $type, $style_settings);
+  drupal_alter('dd_flexible_style_settings_form', $form, $form_state, $details, $style_settings);
 
   // This could be moved somewhere but for now it's OK here.
   if ($type == 'row' || $type == 'column') {

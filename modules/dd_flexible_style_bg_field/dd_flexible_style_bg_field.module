@@ -3,7 +3,8 @@
 /**
  * Implements hook_dd_flexible_style_settings_form_alter().
  */
-function dd_flexible_style_bg_field_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+function dd_flexible_style_bg_field_dd_flexible_style_settings_form_alter(&$form, &$form_state, $details, $style_settings) {
+  $type = $details['type'];
 
   $fields = field_info_fields();
 

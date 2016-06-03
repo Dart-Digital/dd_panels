@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * Implements hook_install().
+ *
+ * Make sure the weight of this is heavier than dd_panels so this preprocess
+ * runs last.
+ */
+function dd_flexible_style_reorder_install() {
+  db_update('system')
+    ->fields(array('weight' => 10))
+    ->condition('name', 'dd_flexible_style_reorder', '=')
+    ->execute();
+}

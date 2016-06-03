@@ -7,7 +7,7 @@
 /**
  * Allows module to add extra fields to the DD Flexible Style settings form.
  */
-function hook_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+function hook_dd_flexible_style_settings_form_alter(&$form, &$form_state, $details, $style_settings) {
 }
 
 /**

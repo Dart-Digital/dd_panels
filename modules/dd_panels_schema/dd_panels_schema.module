@@ -10,7 +10,9 @@ function dd_panels_schema_dd_flexible_layout_settings_form_alter(&$form, &$form_
 /**
  * Implements hook_dd_flexible_style_settings_form_alter().
  */
-function dd_panels_schema_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+function dd_panels_schema_dd_flexible_style_settings_form_alter(&$form, &$form_state, $details, $style_settings) {
+  $type = $details['type'];
+
   dd_panels_schema_settings_form($form, $form_state, $style_settings);
 }
 

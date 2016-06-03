@@ -1,0 +1,94 @@
+<?php
+
+/**
+ * Implements hook_dd_flexible_style_settings_form_alter().
+ */
+function dd_flexible_style_reorder_dd_flexible_style_settings_form_alter(&$form, &$form_state, $details, $style_settings, $details) {
+  $type = $details['type'];
+
+  if ($type == 'pane') {
+    return;
+  }
+
+  // Because we want to give enough space to move the rows and columns between
+  // each other we multiple everything by 10.
+  if ($type == 'column') {
+    $delta = variable_get('dd_flexible_style_num_columns', 12) * 10;
+  }
+  elseif ($type == 'row') {
+    $delta = variable_get('dd_flexible_style_num_rows', 12) * 10;
+  }
+
+  $form['weight'] = array(
+    '#type' => 'weight',
+    '#title' => t('Weight'),
+    '#default_value' => $style_settings['weight'],
+    '#delta' => $delta,
+    '#description' => t('Allows you to reorder rows and columns. In the layout, the heavier items will sink to the bottom and the lighter items will rise to the top. <strong>NOTE:</strong> You will need to refresh the page once this change has been made.'),
+  );
+}
+
+/**
+ * Implements hook_dd_flexible_style_default_settings_alter().
+ */
+function dd_flexible_style_reorder_dd_flexible_style_default_settings_alter(&$settings, $type, $details) {
+
+  // Panes use the normal panels weight for ordering so don't bother with them.
+  if ($type == 'pane') {
+    return;
+  }
+
+  // We always multiple by 10 just to give some room between each one.
+  if ($type == 'column') {
+    $settings['weight'] = $details['column'] * 10;
+  }
+  elseif ($type == 'row') {
+    $settings['weight'] = $details['row'] * 10;
+  }
+}
+
+/**
+ * Implements hook_preprocess().
+ *
+ * This will reorder the rows and columns based on the weight in the settings.
+ */
+function dd_flexible_style_reorder_preprocess_dd_flexible_layout(&$variables) {
+  // Loop through all regions and add the weight to them.
+  foreach ($variables['regions'] as $region_id => &$region) {
+    $style_settings = $variables['display']->panel_settings['style_settings'][$region_id];
+    if (!empty($style_settings['weight'])) {
+      $weight = $style_settings['weight'];
+    }
+    else {
+      $details = dd_panels_get_region_type($region_id);
+      $default_settings = dd_panels_dd_flexible_style_default_settings($details['type'], $details);
+      $weight = $default_settings['weight'];
+    }
+    $region['weight'] = $weight;
+
+    // Loop through all columns and add the weight to them
+    foreach ($region['columns'] as $column_id => &$column) {
+      $style_settings = $variables['display']->panel_settings['style_settings'][$column_id];
+      if (!empty($style_settings['weight'])) {
+        $weight = $style_settings['weight'];
+      }
+      else {
+        $details = dd_panels_get_region_type($column_id);
+        $default_settings = dd_panels_dd_flexible_style_default_settings($details['type'], $details);
+        $weight = $default_settings['weight'];
+      }
+      $column['weight'] = $weight;
+    }
+
+    // Sort the columns in this region.
+    usort($region['columns'], 'dd_flexible_style_reorder_sort');
+
+  }
+
+  // Sort the regions.
+  usort($variables['regions'], 'dd_flexible_style_reorder_sort');
+}
+
+function dd_flexible_style_reorder_sort($a, $b) {
+  return $a['weight'] - $b['weight'];
+}

@@ -315,7 +315,11 @@ function dd_panels_get_child_regions($region_id) {
 }
 
 function dd_panels_get_region_type($region_id) {
-  $details = array('type' => FALSE);
+  $details = array(
+    'id' => $region_id,
+    'type' => FALSE,
+  );
+
   $matches = array();
   preg_match('/(?:row-([0-9]+))(?:-column-([0-9]+))?(?:-pane-([0-9]+))?/', $region_id, $matches);
   if (isset($matches[3])) {
@@ -362,7 +366,7 @@ function dd_flexible_style_attributes($settings, $type, $region_id, $display) {
 
   $attributes['id'] = drupal_html_id($region_id);
 
-  $default_settings = dd_panels_dd_flexible_style_default_settings($type);
+  $default_settings = dd_panels_dd_flexible_style_default_settings($type, $info['details']);
   $settings = array_replace_recursive($default_settings, $settings);
 
   $attributes['class'][] = 'dd-' . $type;
@@ -413,7 +417,7 @@ function dd_flexible_style_wrappers($settings, $type, $region_id, $display) {
   return $wrappers;
 }
 
-function dd_panels_dd_flexible_style_default_settings($type) {
+function dd_panels_dd_flexible_style_default_settings($type, $details) {
 
   $settings = array();
 
@@ -423,7 +427,7 @@ function dd_panels_dd_flexible_style_default_settings($type) {
     $settings[$size] = array();
   }
 
-  drupal_alter('dd_flexible_style_default_settings', $settings, $type);
+  drupal_alter('dd_flexible_style_default_settings', $settings, $type, $details);
 
   return $settings;
 }

@@ -32,7 +32,8 @@ function dd_flexible_style_bg_image_default_styles() {
 /**
  * Implements hook_dd_flexible_style_settings_form_alter().
  */
-function dd_flexible_style_bg_dd_flexible_style_settings_form_alter(&$form, &$form_state, $type, $style_settings) {
+function dd_flexible_style_bg_dd_flexible_style_settings_form_alter(&$form, &$form_state, $details, $style_settings) {
+  $type = $details['type'];
 
   $breakpoints = dd_panels_dd_flexible_style_get_breakpoints();
   $inherit = $form['breakpoints']['#inherit'];
