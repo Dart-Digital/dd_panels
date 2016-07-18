@@ -15,7 +15,7 @@
         $('.' + key).once('popup').each(function() {
           // Prevent popup from triggering if there is nothing to open.
           if ($('#' + popups[key]).length) {
-            $(this).attr('data-reveal-id', popups[key]);
+            $(this).attr('data-open', popups[key]);
           }
         });
       }
