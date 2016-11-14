@@ -215,6 +215,7 @@ function dd_panels_preprocess_dd_flexible_layout(&$variables) {
 
     // Initialise the attributes string in case we don't get any settings.
     $attributes = array();
+    $child_attributes = array();
 
     $wrappers = array(
       'prefix' => '',
@@ -244,6 +245,7 @@ function dd_panels_preprocess_dd_flexible_layout(&$variables) {
       $style_settings = $panel_settings['style_settings'][$key];
 
       $attributes = dd_flexible_style_attributes($style_settings, $details['type'], $key, $display);
+      $child_attributes = dd_flexible_style_child_attributes($style_settings, $details['type'], $key, $display);
       $wrappers = dd_flexible_style_wrappers($style_settings, $details['type'], $key, $display);
 
       // If they've chosen to force this region to show, set $empty to FALSE.
@@ -265,12 +267,14 @@ function dd_panels_preprocess_dd_flexible_layout(&$variables) {
       $regions[$row]['content'] = $region;
       unset($variables['content'][$key]);
       $regions[$row]['attributes'] = $attributes;
+      $regions[$row]['child_attributes'] = $child_attributes;
       $regions[$row] = array_merge($regions[$row], $wrappers);
     }
     else if ($details['type'] == 'column') {
       $regions[$row]['columns'][$key]['empty'] = $empty;
       $regions[$row]['columns'][$key]['content'] = $region;
       $regions[$row]['columns'][$key]['attributes'] = $attributes;
+      $regions[$row]['columns'][$key]['child_attributes'] = $child_attributes;
       $regions[$row]['columns'][$key] = array_merge($regions[$row]['columns'][$key], $wrappers);
       unset($variables['content'][$key]);
     }
@@ -382,6 +386,39 @@ function dd_flexible_style_attributes($settings, $type, $region_id, $display) {
   }
 
   return $attributes;
+}
+
+function dd_flexible_style_child_attributes($settings, $type, $region_id, $display) {
+
+  if (empty($settings)) {
+    $settings = array();
+  }
+
+  $info = array(
+    'type' => $type,
+    'region_id' => $region_id,
+    'display' => $display,
+    'details' => dd_panels_get_region_type($region_id),
+  );
+
+  $child_attributes = array();
+
+  $child_attributes['class'][] = 'row';
+
+  $default_settings = dd_panels_dd_flexible_style_default_settings($type, $info['details']);
+  $settings = array_replace_recursive($default_settings, $settings);
+
+  drupal_alter('dd_flexible_style_child_attributes', $child_attributes, $settings, $info);
+
+  if (isset($child_attributes['styles'])) {
+    $child_attributes['style'] = implode(' ', $child_attributes['styles']);
+  }
+
+  if (isset($child_attributes['class'])) {
+    $child_attributes['class'] = implode(' ', $child_attributes['class']);
+  }
+
+  return $child_attributes;
 }
 
 function dd_flexible_style_wrappers($settings, $type, $region_id, $display) {

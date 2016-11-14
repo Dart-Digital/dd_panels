@@ -13,13 +13,13 @@
       <div<?php print drupal_attributes($row['attributes']); ?>>
         <?php print $row['inner_prefix']; ?>
         <?php print $row['content']; ?>
-        <div class="row">
+        <div<?php print drupal_attributes($row['child_attributes']); ?>>
           <?php foreach($row['columns'] as $key => $column): ?>
             <?php if (!$column['empty']): ?>
               <?php print $column['prefix']; ?>
               <div<?php print drupal_attributes($column['attributes']); ?>>
                 <?php print $column['inner_prefix']; ?>
-                <div class="row">
+                <div<?php print drupal_attributes($column['child_attributes']); ?>>
                   <?php print $column['content']; ?>
                 </div>
                 <?php print $column['inner_suffix']; ?>
