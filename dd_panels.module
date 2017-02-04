@@ -189,11 +189,11 @@ function dd_panels_preprocess_dd_flexible_layout(&$variables) {
       }
 
       if (empty($attributes['class'])) {
-        $attributes['class'] = '';
+        $attributes['class'] = [];
       }
 
-      $attributes['class'] .= ' small-' . variable_get('dd_flexible_style_num_columns', 12);
-      $attributes['class'] .= ' columns';
+      $attributes['class'][] = 'small-' . variable_get('dd_flexible_style_num_columns', 12);
+      $attributes['class'][] = 'columns';
 
       $variables['popups'][$key]['attributes'] = $attributes;
     }
@@ -381,10 +381,6 @@ function dd_flexible_style_attributes($settings, $type, $region_id, $display) {
     $attributes['style'] = implode(' ', $attributes['styles']);
   }
 
-  if (isset($attributes['class'])) {
-    $attributes['class'] = implode(' ', $attributes['class']);
-  }
-
   return $attributes;
 }
 
@@ -412,10 +408,6 @@ function dd_flexible_style_child_attributes($settings, $type, $region_id, $displ
 
   if (isset($child_attributes['styles'])) {
     $child_attributes['style'] = implode(' ', $child_attributes['styles']);
-  }
-
-  if (isset($child_attributes['class'])) {
-    $child_attributes['class'] = implode(' ', $child_attributes['class']);
   }
 
   return $child_attributes;
@@ -487,10 +479,6 @@ function dd_flexible_layout_attributes($settings, $display) {
 
   if (isset($attributes['styles'])) {
     $attributes['style'] = implode(' ', $attributes['styles']);
-  }
-
-  if (isset($attributes['class'])) {
-    $attributes['class'] = implode(' ', $attributes['class']);
   }
 
   return $attributes;
