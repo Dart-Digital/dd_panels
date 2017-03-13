@@ -3,7 +3,7 @@
 /**
  * Implements hook_dd_flexible_style_settings_form_alter().
  */
-function dd_flexible_style_reorder_dd_flexible_style_settings_form_alter(&$form, &$form_state, $details, $style_settings, $details) {
+function dd_flexible_style_reorder_dd_flexible_style_settings_form_alter(&$form, &$form_state, $details, $style_settings) {
   $type = $details['type'];
 
   if ($type == 'pane') {
