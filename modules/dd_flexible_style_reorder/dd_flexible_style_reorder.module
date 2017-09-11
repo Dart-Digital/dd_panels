@@ -55,7 +55,7 @@ function dd_flexible_style_reorder_dd_flexible_style_default_settings_alter(&$se
 function dd_flexible_style_reorder_preprocess_dd_flexible_layout(&$variables) {
   // Loop through all regions and add the weight to them.
   foreach ($variables['regions'] as $region_id => &$region) {
-    $style_settings = $variables['display']->panel_settings['style_settings'][$region_id];
+    $style_settings = !empty($variables['display']->panel_settings['style_settings'][$region_id]) ? $variables['display']->panel_settings['style_settings'][$region_id] : array();
     if (!empty($style_settings['weight'])) {
       $weight = $style_settings['weight'];
     }
@@ -68,7 +68,7 @@ function dd_flexible_style_reorder_preprocess_dd_flexible_layout(&$variables) {
 
     // Loop through all columns and add the weight to them
     foreach ($region['columns'] as $column_id => &$column) {
-      $style_settings = $variables['display']->panel_settings['style_settings'][$column_id];
+      $style_settings = !empty($variables['display']->panel_settings['style_settings'][$column_id]) ? $variables['display']->panel_settings['style_settings'][$column_id] : array();
       if (!empty($style_settings['weight'])) {
         $weight = $style_settings['weight'];
       }
