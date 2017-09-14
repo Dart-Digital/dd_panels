@@ -43,6 +43,7 @@ function dd_flexible_style_bg_field_dd_flexible_style_settings_form_alter(&$form
  */
 function dd_flexible_style_bg_field_dd_flexible_style_attributes_alter(&$attributes, $settings, $info) {
   $type = $info['type'];
+  global $language;
 
   // Apply settings that only should be done on rows.
   if ($type == 'row') {
@@ -63,9 +64,22 @@ function dd_flexible_style_bg_field_dd_flexible_style_attributes_alter(&$attribu
       if (!empty($settings[$size]['bg_image_field'])) {
         $field = $settings[$size]['bg_image_field'];
         $node = menu_get_object();
+        $langcode = NULL;
         if (!empty($node)) {
-          if (!empty($node->{$field}) && !empty($node->{$field}[LANGUAGE_NONE])) {
-            $file = file_load($node->{$field}[LANGUAGE_NONE][0]['fid']);
+          if (!empty($node->translations)) {
+            $field_info = field_info_field($field);
+            if ($field_info['translatable']) {
+              if (!empty($node->translations->data[$language->language])) {
+                $langcode = $language->language;
+              }
+              else {
+                $langcode = $node->translations->original;
+              }
+            }
+          }
+          $field_items = field_get_items('node', $node, $field, $langcode);
+          if (!empty($field_items)) {
+            $file = file_load($field_items[0]['fid']);
           }
         }
       }
